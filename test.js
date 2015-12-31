@@ -7,7 +7,6 @@ test(t => {
 	t.not(x.indexOf('name'), -1);
 	t.not(x.indexOf('stack'), -1);
 	t.not(x.indexOf('message'), -1);
-	t.end();
 });
 
 test('should destroy circular references', t => {
@@ -15,10 +14,8 @@ test('should destroy circular references', t => {
 	obj.child = {parent: obj};
 
 	const serialized = serialize(obj);
-
 	t.is(typeof serialized, 'object');
 	t.is(serialized.child.parent, '[Circular]');
-	t.end();
 });
 
 test('should not affect the original object', t => {
@@ -26,10 +23,8 @@ test('should not affect the original object', t => {
 	obj.child = {parent: obj};
 
 	const serialized = serialize(obj);
-
 	t.not(serialized, obj);
 	t.is(obj.child.parent, obj);
-	t.end();
 });
 
 test('should only destroy parent references', t => {
@@ -39,12 +34,10 @@ test('should only destroy parent references', t => {
 	obj.two = {secondThing: common};
 
 	const serialized = serialize(obj);
-
 	t.is(typeof serialized.one.firstThing, 'object');
 	t.is(typeof serialized.two.secondThing, 'object');
 	t.is(serialized.one.firstThing.thing, '[Circular]');
 	t.is(serialized.two.secondThing.thing, '[Circular]');
-	t.end();
 });
 
 test('should work on arrays', t => {
@@ -57,13 +50,11 @@ test('should work on arrays', t => {
 	obj.b = {y: y};
 
 	const serialized = serialize(obj);
-
 	t.true(Array.isArray(serialized.a.x));
 	t.is(serialized.a.x[0][0], '[Circular]');
 	t.is(serialized.b.y[0][0], 'test');
 	t.is(serialized.b.y[1][0], '[Circular]');
 	t.is(serialized.b.y[0][1], '[Circular]');
-	t.end();
 });
 
 test('should discard nested functions', t => {
@@ -73,9 +64,7 @@ test('should discard nested functions', t => {
 	const obj = {a: a};
 
 	const serialized = serialize(obj);
-
 	t.same(serialized, {});
-	t.end();
 });
 
 test('should replace top-level functions with a helpful string', t => {
@@ -84,9 +73,7 @@ test('should replace top-level functions with a helpful string', t => {
 	a.b = b;
 
 	const serialized = serialize(a);
-
 	t.is(serialized, '[Function: a]');
-	t.end();
 });
 
 test('should drop functions', t => {
@@ -98,5 +85,4 @@ test('should drop functions', t => {
 	const serialized = serialize(obj);
 	t.same(serialized, {});
 	t.false(serialized.hasOwnProperty('a'));
-	t.end();
 });
