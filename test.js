@@ -86,3 +86,16 @@ test('should drop functions', t => {
 	t.same(serialized, {});
 	t.false(serialized.hasOwnProperty('a'));
 });
+
+test('should not access deep non-enumerable properties', t => {
+	const error = Error('some error');
+	const obj = {};
+	Object.defineProperty(obj, 'someProp', {
+		enumerable: false,
+		get: () => {
+			throw Error('some other error');
+		}
+	});
+	error.obj = obj;
+	t.notThrows(() => serialize(error));
+});
