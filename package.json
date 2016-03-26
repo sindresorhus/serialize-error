@@ -25,7 +25,9 @@
     "stringify",
     "object",
     "obj",
-    "convert"
+    "convert",
+    "process",
+    "send"
   ],
   "devDependencies": {
     "ava": "*",

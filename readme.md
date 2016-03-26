@@ -2,7 +2,7 @@
 
 > Serialize an error into a plain object
 
-Useful if you for example need to `JSON.stringify()` the error.
+Useful if you for example need to `JSON.stringify()` or `process.send()` the error.
 
 
 ## Install
@@ -28,4 +28,4 @@ console.log(serializeError(error));
 
 ## License
 
-MIT © [Sindre Sorhus](http://sindresorhus.com)
+MIT © [Sindre Sorhus](https://sindresorhus.com)
