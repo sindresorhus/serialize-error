@@ -3,7 +3,21 @@
 // Make a value ready for JSON.stringify() / process.send()
 module.exports = function serializeError(value) {
 	if (typeof value === 'object') {
-		return destroyCircular(value, []);
+		var serialized = destroyCircular(value, []);
+
+		if (typeof value.name === 'string') {
+			serialized.name = value.name;
+		}
+
+		if (typeof value.message === 'string') {
+			serialized.message = value.message;
+		}
+
+		if (typeof value.stack === 'string') {
+			serialized.stack = value.stack;
+		}
+
+		return serialized;
 	}
 
 	// People sometimes throw things besides Error objects, so...
@@ -23,15 +37,11 @@ function destroyCircular(from, seen) {
 		to = [];
 	} else {
 		to = {};
-		if (typeof from.name === 'string') {
-			// name is not enumerable on Error objects.
-			to.name = from.name;
-		}
 	}
 
 	seen.push(from);
 
-	Object.getOwnPropertyNames(from).forEach(function (key) {
+	Object.keys(from).forEach(function (key) {
 		var value = from[key];
 
 		if (typeof value === 'function') {
