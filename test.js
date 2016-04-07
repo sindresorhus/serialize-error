@@ -64,7 +64,7 @@ test('should discard nested functions', t => {
 	const obj = {a: a};
 
 	const serialized = serialize(obj);
-	t.same(serialized, {});
+	t.deepEqual(serialized, {});
 });
 
 test('should replace top-level functions with a helpful string', t => {
@@ -83,7 +83,7 @@ test('should drop functions', t => {
 	const obj = {a: a};
 
 	const serialized = serialize(obj);
-	t.same(serialized, {});
+	t.deepEqual(serialized, {});
 	t.false(serialized.hasOwnProperty('a'));
 });
 
