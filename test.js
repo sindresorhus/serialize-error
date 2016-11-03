@@ -99,3 +99,12 @@ test('should not access deep non-enumerable properties', t => {
 	error.obj = obj;
 	t.notThrows(() => serialize(error));
 });
+
+test('should serialize nested errors', t => {
+	const error = Error('outer error');
+	error.innerError = Error('inner error');
+
+	const serialized = serialize(error);
+	t.is(serialized.message, 'outer error');
+	t.is(serialized.innerError.message, 'inner error');
+});

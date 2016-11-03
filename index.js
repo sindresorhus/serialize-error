@@ -3,21 +3,7 @@
 // Make a value ready for JSON.stringify() / process.send()
 module.exports = function serializeError(value) {
 	if (typeof value === 'object') {
-		var serialized = destroyCircular(value, []);
-
-		if (typeof value.name === 'string') {
-			serialized.name = value.name;
-		}
-
-		if (typeof value.message === 'string') {
-			serialized.message = value.message;
-		}
-
-		if (typeof value.stack === 'string') {
-			serialized.stack = value.stack;
-		}
-
-		return serialized;
+		return destroyCircular(value, []);
 	}
 
 	// People sometimes throw things besides Error objects, so...
@@ -60,6 +46,18 @@ function destroyCircular(from, seen) {
 
 		to[key] = '[Circular]';
 	});
+
+	if (typeof from.name === 'string') {
+		to.name = from.name;
+	}
+
+	if (typeof from.message === 'string') {
+		to.message = from.message;
+	}
+
+	if (typeof from.stack === 'string') {
+		to.stack = from.stack;
+	}
 
 	return to;
 }
