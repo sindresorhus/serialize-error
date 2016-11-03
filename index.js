@@ -1,7 +1,7 @@
 'use strict';
 
 // Make a value ready for JSON.stringify() / process.send()
-module.exports = function serializeError(value) {
+function serializeError(value) {
 	if (typeof value === 'object') {
 		return destroyCircular(value, []);
 	}
@@ -14,7 +14,9 @@ module.exports = function serializeError(value) {
 	}
 
 	return value;
-};
+}
+
+module.exports = serializeError;
 
 // https://www.npmjs.com/package/destroy-circular
 function destroyCircular(from, seen) {
