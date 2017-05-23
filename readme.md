@@ -22,7 +22,7 @@ console.log(error);
 //=> [Error: unicorn]
 
 console.log(serializeError(error));
-//=> {name: 'Error', message: 'unicorn', stack: 'Error: unicorn\n    at Object.<anonymous> ...'}
+//=> {name: 'Error', message: 'unicorn', stack: 'Error: unicorn\n    at Object.<anonymous> …'}
 ```
 
 
