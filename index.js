@@ -9,7 +9,7 @@ module.exports = function (value) {
 	// People sometimes throw things besides Error objects, so...
 
 	if (typeof value === 'function') {
-		// JSON.stringify discards functions. We do to, unless a function is thrown directly.
+		// JSON.stringify discards functions. We do too, unless a function is thrown directly.
 		return '[Function: ' + (value.name || 'anonymous') + ']';
 	}
 
