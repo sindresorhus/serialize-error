@@ -52,6 +52,13 @@ function destroyCircular(from, seen) {
 	if (typeof from.stack === 'string') {
 		to.stack = from.stack;
 	}
+	
+	let errorEventProps = ["message", "filename", "lineno", "colno", "error"]
+        errorEventProps.forEach(prop => {
+        if (typeof from[prop] === 'string'){
+       		to[prop] = from[prop];
+        	}  
+        })
 
 	return to;
 }
