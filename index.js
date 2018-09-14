@@ -40,7 +40,7 @@ function destroyCircular(from, seen) {
 
 		to[key] = '[Circular]';
 	}
-
+	
 	if (typeof from.name === 'string') {
 		to.name = from.name;
 	}
@@ -51,6 +51,10 @@ function destroyCircular(from, seen) {
 
 	if (typeof from.stack === 'string') {
 		to.stack = from.stack;
+	}
+	
+	if (typeof from.code === 'string') {
+		to.code = from.code;
 	}
 
 	return to;
