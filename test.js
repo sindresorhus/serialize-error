@@ -88,7 +88,7 @@ test('should drop functions', t => {
 });
 
 test('should not access deep non-enumerable properties', t => {
-	const error = Error('some error');
+	const error = new Error('some error');
 	const obj = {};
 	Object.defineProperty(obj, 'someProp', {
 		enumerable: false,
