@@ -1,26 +1,11 @@
 'use strict';
 
-module.exports = value => {
-	if (typeof value === 'object') {
-		return destroyCircular(value, []);
-	}
-
-	// People sometimes throw things besides Error objects, so…
-
-	if (typeof value === 'function') {
-		// JSON.stringify discards functions. We do too, unless a function is thrown directly.
-		return `[Function: ${(value.name || 'anonymous')}]`;
-	}
-
-	return value;
-};
-
-// https://www.npmjs.com/package/destroy-circular
-function destroyCircular(from, seen) {
+const destroyCircular = (from, seen) => {
 	const to = Array.isArray(from) ? [] : {};
 
 	seen.push(from);
 
+	// TODO: Use `Object.entries() when targeting Node.js 8
 	for (const key of Object.keys(from)) {
 		const value = from[key];
 
@@ -33,19 +18,35 @@ function destroyCircular(from, seen) {
 			continue;
 		}
 
-		if (seen.indexOf(from[key]) === -1) {
-			to[key] = destroyCircular(from[key], seen.slice(0));
+		if (!seen.includes(from[key])) {
+			to[key] = destroyCircular(from[key], seen.slice());
 			continue;
 		}
 
 		to[key] = '[Circular]';
 	}
 
-	['name', 'message', 'stack', 'code'].forEach(prop => {
-		if (typeof from[prop] === 'string') {
-			to[prop] = from[prop];
+	const commonProperties = ['name', 'message', 'stack', 'code'];
+
+	for (const property of commonProperties) {
+		if (typeof from[property] === 'string') {
+			to[property] = from[property];
 		}
-	});
+	}
 
 	return to;
-}
+};
+
+module.exports = value => {
+	if (typeof value === 'object') {
+		return destroyCircular(value, []);
+	}
+
+	// People sometimes throw things besides Error objects…
+	if (typeof value === 'function') {
+		// JSON.stringify discards functions. We do too, unless a function is thrown directly.
+		return `[Function: ${(value.name || 'anonymous')}]`;
+	}
+
+	return value;
+};

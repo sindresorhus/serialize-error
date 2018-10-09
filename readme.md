@@ -8,7 +8,7 @@ Useful if you for example need to `JSON.stringify()` or `process.send()` the err
 ## Install
 
 ```
-$ npm install --save serialize-error
+$ npm install serialize-error
 ```
 
 

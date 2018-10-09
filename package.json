@@ -1,36 +1,35 @@
 {
-  "name": "serialize-error",
-  "version": "2.1.0",
-  "description": "Serialize an error into a plain object",
-  "license": "MIT",
-  "repository": "sindresorhus/serialize-error",
-  "author": {
-    "name": "Sindre Sorhus",
-    "email": "sindresorhus@gmail.com",
-    "url": "sindresorhus.com"
-  },
-  "engines": {
-    "node": ">=4"
-  },
-  "scripts": {
-    "test": "xo && ava"
-  },
-  "files": [
-    "index.js"
-  ],
-  "keywords": [
-    "error",
-    "err",
-    "serialize",
-    "stringify",
-    "object",
-    "obj",
-    "convert",
-    "process",
-    "send"
-  ],
-  "devDependencies": {
-    "ava": "*",
-    "xo": "*"
-  }
+	"name": "serialize-error",
+	"version": "2.1.0",
+	"description": "Serialize an error into a plain object",
+	"license": "MIT",
+	"repository": "sindresorhus/serialize-error",
+	"author": {
+		"name": "Sindre Sorhus",
+		"email": "sindresorhus@gmail.com",
+		"url": "sindresorhus.com"
+	},
+	"engines": {
+		"node": ">=6"
+	},
+	"scripts": {
+		"test": "xo && ava"
+	},
+	"files": [
+		"index.js"
+	],
+	"keywords": [
+		"error",
+		"err",
+		"serialize",
+		"stringify",
+		"object",
+		"convert",
+		"process",
+		"send"
+	],
+	"devDependencies": {
+		"ava": "^0.25.0",
+		"xo": "^0.23.0"
+	}
 }

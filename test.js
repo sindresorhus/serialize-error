@@ -1,39 +1,39 @@
 import test from 'ava';
-import m from '.';
+import serializeError from '.';
 
-test(t => {
-	const serialized = m(new Error('foo'));
-	const x = Object.keys(serialized);
-	t.not(x.indexOf('name'), -1);
-	t.not(x.indexOf('stack'), -1);
-	t.not(x.indexOf('message'), -1);
+test('main', t => {
+	const serialized = serializeError(new Error('foo'));
+	const keys = Object.keys(serialized);
+	t.true(keys.includes('name'));
+	t.true(keys.includes('stack'));
+	t.true(keys.includes('message'));
 });
 
 test('should destroy circular references', t => {
-	const obj = {};
-	obj.child = {parent: obj};
+	const object = {};
+	object.child = {parent: object};
 
-	const serialized = m(obj);
+	const serialized = serializeError(object);
 	t.is(typeof serialized, 'object');
 	t.is(serialized.child.parent, '[Circular]');
 });
 
 test('should not affect the original object', t => {
-	const obj = {};
-	obj.child = {parent: obj};
+	const object = {};
+	object.child = {parent: object};
 
-	const serialized = m(obj);
-	t.not(serialized, obj);
-	t.is(obj.child.parent, obj);
+	const serialized = serializeError(object);
+	t.not(serialized, object);
+	t.is(object.child.parent, object);
 });
 
 test('should only destroy parent references', t => {
-	const obj = {};
-	const common = {thing: obj};
-	obj.one = {firstThing: common};
-	obj.two = {secondThing: common};
+	const object = {};
+	const common = {thing: object};
+	object.one = {firstThing: common};
+	object.two = {secondThing: common};
 
-	const serialized = m(obj);
+	const serialized = serializeError(object);
 	t.is(typeof serialized.one.firstThing, 'object');
 	t.is(typeof serialized.two.secondThing, 'object');
 	t.is(serialized.one.firstThing.thing, '[Circular]');
@@ -41,15 +41,15 @@ test('should only destroy parent references', t => {
 });
 
 test('should work on arrays', t => {
-	const obj = {};
-	const common = [obj];
+	const object = {};
+	const common = [object];
 	const x = [common];
 	const y = [['test'], common];
 	y[0][1] = y;
-	obj.a = {x};
-	obj.b = {y};
+	object.a = {x};
+	object.b = {y};
 
-	const serialized = m(obj);
+	const serialized = serializeError(object);
 	t.true(Array.isArray(serialized.a.x));
 	t.is(serialized.a.x[0][0], '[Circular]');
 	t.is(serialized.b.y[0][0], 'test');
@@ -61,9 +61,9 @@ test('should discard nested functions', t => {
 	function a() {}
 	function b() {}
 	a.b = b;
-	const obj = {a};
+	const object = {a};
 
-	const serialized = m(obj);
+	const serialized = serializeError(object);
 	t.deepEqual(serialized, {});
 });
 
@@ -72,7 +72,7 @@ test('should replace top-level functions with a helpful string', t => {
 	function b() {}
 	a.b = b;
 
-	const serialized = m(a);
+	const serialized = serializeError(a);
 	t.is(serialized, '[Function: a]');
 });
 
@@ -80,31 +80,31 @@ test('should drop functions', t => {
 	function a() {}
 	a.foo = 'bar;';
 	a.b = a;
-	const obj = {a};
+	const object = {a};
 
-	const serialized = m(obj);
+	const serialized = serializeError(object);
 	t.deepEqual(serialized, {});
 	t.false(Object.prototype.hasOwnProperty.call(serialized, 'a'));
 });
 
 test('should not access deep non-enumerable properties', t => {
 	const error = new Error('some error');
-	const obj = {};
-	Object.defineProperty(obj, 'someProp', {
+	const object = {};
+	Object.defineProperty(object, 'someProp', {
 		enumerable: false,
 		get() {
 			throw new Error('some other error');
 		}
 	});
-	error.obj = obj;
-	t.notThrows(() => m(error));
+	error.object = object;
+	t.notThrows(() => serializeError(error));
 });
 
 test('should serialize nested errors', t => {
 	const error = new Error('outer error');
 	error.innerError = new Error('inner error');
 
-	const serialized = m(error);
+	const serialized = serializeError(error);
 	t.is(serialized.message, 'outer error');
 	t.is(serialized.innerError.message, 'inner error');
 });
