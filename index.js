@@ -41,17 +41,11 @@ function destroyCircular(from, seen) {
 		to[key] = '[Circular]';
 	}
 
-	if (typeof from.name === 'string') {
-		to.name = from.name;
-	}
-
-	if (typeof from.message === 'string') {
-		to.message = from.message;
-	}
-
-	if (typeof from.stack === 'string') {
-		to.stack = from.stack;
-	}
+	['name', 'message', 'stack', 'code'].forEach(prop => {
+		if (typeof from[prop] === 'string') {
+			to[prop] = from[prop];
+		}
+	});
 
 	return to;
 }
