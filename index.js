@@ -5,10 +5,7 @@ const destroyCircular = (from, seen) => {
 
 	seen.push(from);
 
-	// TODO: Use `Object.entries() when targeting Node.js 8
-	for (const key of Object.keys(from)) {
-		const value = from[key];
-
+	for (const [key, value] of Object.entries(from)) {
 		if (typeof value === 'function') {
 			continue;
 		}
@@ -37,7 +34,7 @@ const destroyCircular = (from, seen) => {
 	return to;
 };
 
-module.exports = value => {
+const serializeError = value => {
 	if (typeof value === 'object') {
 		return destroyCircular(value, []);
 	}
@@ -50,3 +47,6 @@ module.exports = value => {
 
 	return value;
 };
+
+module.exports = serializeError;
+module.exports.default = serializeError;
