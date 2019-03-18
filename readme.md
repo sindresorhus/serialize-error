@@ -16,13 +16,14 @@ $ npm install serialize-error
 
 ```js
 const serializeError = require('serialize-error');
-const error = new Error('unicorn');
+
+const error = new Error('🦄');
 
 console.log(error);
-//=> [Error: unicorn]
+//=> [Error: 🦄]
 
 console.log(serializeError(error));
-//=> {name: 'Error', message: 'unicorn', stack: 'Error: unicorn\n    at Object.<anonymous> …'}
+//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
 ```
 
 

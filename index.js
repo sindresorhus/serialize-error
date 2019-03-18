@@ -23,7 +23,12 @@ const destroyCircular = (from, seen) => {
 		to[key] = '[Circular]';
 	}
 
-	const commonProperties = ['name', 'message', 'stack', 'code'];
+	const commonProperties = [
+		'name',
+		'message',
+		'stack',
+		'code'
+	];
 
 	for (const property of commonProperties) {
 		if (typeof from[property] === 'string') {
@@ -41,7 +46,7 @@ const serializeError = value => {
 
 	// People sometimes throw things besides Error objects…
 	if (typeof value === 'function') {
-		// JSON.stringify discards functions. We do too, unless a function is thrown directly.
+		// `JSON.stringify()` discards functions. We do too, unless a function is thrown directly.
 		return `[Function: ${(value.name || 'anonymous')}]`;
 	}
 
