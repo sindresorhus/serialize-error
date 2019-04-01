@@ -1,26 +1,41 @@
 import {Primitive, JsonObject} from 'type-fest';
 
-export type ErrorObject = {
-	name?: string;
-	stack?: string;
-	message?: string;
-	code?: string;
-} & JsonObject;
+declare namespace serializeError {
+	type ErrorObject = {
+		name?: string;
+		stack?: string;
+		message?: string;
+		code?: string;
+	} & JsonObject;
+}
 
-/**
-Serialize an error into a plain object.
+declare const serializeError: {
+	/**
+	Serialize an error into a plain object.
 
-@example
-```
-import serializeError from 'serialize-error';
+	@example
+	```
+	import serializeError = require('serialize-error');
 
-const error = new Error('🦄');
+	const error = new Error('🦄');
 
-console.log(error);
-//=> [Error: 🦄]
+	console.log(error);
+	//=> [Error: 🦄]
 
-console.log(serializeError(error));
-//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
-```
-*/
-export default function serializeError<ErrorType>(error: ErrorType): ErrorType extends Primitive ? ErrorType : ErrorObject;
+	console.log(serializeError(error));
+	//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
+	```
+	*/
+	<ErrorType>(error: ErrorType): ErrorType extends Primitive
+		? ErrorType
+		: serializeError.ErrorObject;
+
+	// TODO: Remove this for the next major release, refactor the whole definition to:
+	// declare function serializeError<ErrorType>(
+	// 	error: ErrorType
+	// ): ErrorType extends Primitive ? ErrorType : ErrorObject;
+	// export = serializeError;
+	default: typeof serializeError;
+};
+
+export = serializeError;
