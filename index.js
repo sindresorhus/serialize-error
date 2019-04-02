@@ -54,4 +54,5 @@ const serializeError = value => {
 };
 
 module.exports = serializeError;
+// TODO: Remove this for the next major release
 module.exports.default = serializeError;

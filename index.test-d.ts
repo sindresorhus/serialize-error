@@ -1,5 +1,6 @@
-import {expectType} from 'tsd-check';
-import serializeError, {ErrorObject} from '.';
+import {expectType} from 'tsd';
+import serializeError = require('.');
+import {ErrorObject} from '.';
 
 const error = new Error('unicorn');
 
