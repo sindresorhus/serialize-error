@@ -24,6 +24,11 @@ console.log(error);
 
 console.log(serializeError(error));
 //=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
+
+// Passing `maxDepth` will limit how deep we will copy the error object
+const nestedError = {...error, a: {b: 'c'}};
+console.log(serializeError(nestedError), {maxDepth:1});
+//=> {name: 'Error', message: 'oops', stack: stack: 'Error: 🦄\n    at Object.<anonymous> …', a: {} }
 ```
 
 

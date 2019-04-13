@@ -7,6 +7,10 @@ declare namespace serializeError {
 		message?: string;
 		code?: string;
 	} & JsonObject;
+
+	type SerializeOptions = {
+		maxDepth: number;
+	};
 }
 
 declare const serializeError: {
@@ -26,7 +30,7 @@ declare const serializeError: {
 	//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
 	```
 	*/
-	<ErrorType>(error: ErrorType): ErrorType extends Primitive
+	<ErrorType>(error: ErrorType, options?: serializeError.SerializeOptions): ErrorType extends Primitive
 		? ErrorType
 		: serializeError.ErrorObject;
 

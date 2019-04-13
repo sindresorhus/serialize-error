@@ -108,3 +108,20 @@ test('should serialize nested errors', t => {
 	t.is(serialized.message, 'outer error');
 	t.is(serialized.innerError.message, 'inner error');
 });
+
+test('should respect maxDepth option', t => {
+	const error = new Error('nested error');
+	error.response = {
+		headers: {
+			contentType: 'application/json'
+		},
+		data: 'Hello, world'
+	};
+
+	const serializedOneDeep = serializeError(error, {maxDepth: 1});
+	t.is(serializedOneDeep.message, 'nested error');
+	t.deepEqual(serializedOneDeep.response, {});
+
+	const serializedTwoDeep = serializeError(error, {maxDepth: 2});
+	t.deepEqual(serializedTwoDeep.response, {data: 'Hello, world', headers: {}});
+});
