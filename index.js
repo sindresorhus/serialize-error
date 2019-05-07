@@ -41,6 +41,10 @@ const destroyCircular = (from, seen) => {
 
 const serializeError = value => {
 	if (typeof value === 'object') {
+		if (value.toJSON instanceof Function) {
+			return value.toJSON();
+		}
+
 		return destroyCircular(value, []);
 	}
 
