@@ -5,7 +5,7 @@ const destroyCircular = (from, seen, maxDepth, depth) => {
 
 	seen.push(from);
 
-	if (maxDepth && depth === maxDepth) {
+	if (depth === maxDepth) {
 		return to;
 	}
 
@@ -45,7 +45,7 @@ const destroyCircular = (from, seen, maxDepth, depth) => {
 };
 
 const serializeError = (value, options = {}) => {
-	const {maxDepth = 0} = options;
+	const {maxDepth = Infinity} = options;
 
 	if (typeof value === 'object') {
 		return destroyCircular(value, [], maxDepth, 0);

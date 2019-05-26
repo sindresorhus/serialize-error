@@ -27,10 +27,30 @@ console.log(serializeError(error));
 
 // Passing `maxDepth` will limit how deep we will copy the error object
 const nestedError = {...error, a: {b: 'c'}};
-console.log(serializeError(nestedError), {maxDepth:1});
+console.log(serializeError(nestedError), {maxDepth: 1});
 //=> {name: 'Error', message: 'oops', stack: stack: 'Error: 🦄\n    at Object.<anonymous> …', a: {} }
 ```
 
+## API
+
+### serialize(error, [options])
+
+#### error
+
+Type: `Error`
+
+An error object.
+
+#### options
+
+Type: `Object`
+
+##### maxDepth
+
+Type: `Number`<br>
+Default: `Infinity`
+
+Specify a maximum depth on the serialized error object.
 
 ## License
 
