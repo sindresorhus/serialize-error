@@ -11,6 +11,7 @@ const destroyCircular = (from, seen, maxDepth, depth) => {
 
 	for (const [key, value] of Object.entries(from)) {
 		depth++;
+
 		if (typeof value === 'function') {
 			continue;
 		}
