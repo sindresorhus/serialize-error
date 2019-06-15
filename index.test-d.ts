@@ -1,4 +1,4 @@
-import {expectError, expectType} from 'tsd';
+import {expectType, expectError} from 'tsd';
 import serializeError = require('.');
 import {ErrorObject, Options} from '.';
 
