@@ -33,7 +33,7 @@ console.log(serializeError(nestedError), {maxDepth: 1});
 
 ## API
 
-### serialize(error, [options])
+### serialize(error, options?)
 
 #### error
 
@@ -43,14 +43,15 @@ An error object.
 
 #### options
 
-Type: `Object`
+Type: `object`
 
 ##### maxDepth
 
-Type: `Number`<br>
+Type: `number`<br>
 Default: `Infinity`
 
 Specify a maximum depth on the serialized error object.
+
 
 ## License
 
