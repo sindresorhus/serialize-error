@@ -40,7 +40,7 @@ const destroyCircular = (from, seen) => {
 };
 
 const serializeError = value => {
-	if (typeof value === 'object') {
+	if (value !== null && typeof value === 'object') {
 		return destroyCircular(value, []);
 	}
 
