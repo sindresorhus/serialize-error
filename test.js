@@ -108,3 +108,10 @@ test('should serialize nested errors', t => {
 	t.is(serialized.message, 'outer error');
 	t.is(serialized.innerError.message, 'inner error');
 });
+
+test('should convert Date to ISO string', t => {
+	const error = new Error('foo');
+	error.birthdate = new Date(0);
+	const serialized = serializeError(error);
+	t.is(serialized.birthdate, '1970-01-01T00:00:00.000Z');
+});
