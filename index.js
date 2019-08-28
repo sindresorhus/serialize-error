@@ -14,6 +14,11 @@ const destroyCircular = (from, seen) => {
 			to[key] = value;
 			continue;
 		}
+		
+		if (value instanceof Date) {
+			to[key] = value.toISOString();
+			continue;
+		}
 
 		if (!seen.includes(from[key])) {
 			to[key] = destroyCircular(from[key], seen.slice());
