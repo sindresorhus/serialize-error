@@ -10,13 +10,8 @@ const destroyCircular = (from, seen) => {
 			continue;
 		}
 
-		if (!value || typeof value !== 'object') {
+		if (!value || typeof value !== 'object' || value instanceof Date) {
 			to[key] = value;
-			continue;
-		}
-
-		if (value instanceof Date) {
-			to[key] = value.toISOString();
 			continue;
 		}
 

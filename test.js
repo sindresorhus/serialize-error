@@ -113,5 +113,5 @@ test('should convert Date to ISO string', t => {
 	const error = new Error('foo');
 	error.birthdate = new Date(0);
 	const serialized = serializeError(error);
-	t.is(serialized.birthdate, '1970-01-01T00:00:00.000Z');
+	t.deepEqual(serialized.birthdate, new Date(0));
 });
