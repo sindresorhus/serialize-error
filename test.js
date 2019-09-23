@@ -109,6 +109,11 @@ test('should serialize nested errors', t => {
 	t.is(serialized.innerError.message, 'inner error');
 });
 
+test('should handle top-level null values', t => {
+	const serialized = serializeError(null);
+	t.is(serialized, null);
+});
+
 test('should deserialize null', t => {
 	const deserialized = deserializeError(null);
 	t.true(deserialized instanceof Error);
