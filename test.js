@@ -109,9 +109,10 @@ test('should serialize nested errors', t => {
 	t.is(serialized.innerError.message, 'inner error');
 });
 
-test('should convert Date to ISO string', t => {
+test('should convert properties of type Date to ISO string', t => {
 	const error = new Error('foo');
-	error.birthdate = new Date(0);
+	const date = new Date(0)
+	error.date = date;
 	const serialized = serializeError(error);
-	t.deepEqual(serialized.birthdate, new Date(0));
+	t.is(serialized.date, date.toISOString());
 });
