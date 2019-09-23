@@ -1,5 +1,5 @@
 import test from 'ava';
-import serializeError from '.';
+import {serializeError, deserializeError} from '.';
 
 test('main', t => {
 	const serialized = serializeError(new Error('foo'));
@@ -107,4 +107,44 @@ test('should serialize nested errors', t => {
 	const serialized = serializeError(error);
 	t.is(serialized.message, 'outer error');
 	t.is(serialized.innerError.message, 'inner error');
+});
+
+test('should deserialize null', t => {
+	const deserialized = deserializeError(null);
+	t.is(deserialized instanceof Error, true);
+	t.is(deserialized.message, 'unknown');
+});
+
+test('should deserialize number', t => {
+	const deserialized = deserializeError(1);
+	t.is(deserialized instanceof Error, true);
+	t.is(deserialized.message, 'unknown');
+});
+
+test('should deserialize error', t => {
+	const deserialized = deserializeError(new Error('test'));
+	t.is(deserialized instanceof Error, true);
+	t.is(deserialized.message, 'test');
+});
+
+test('should deserialize array', t => {
+	const deserialized = deserializeError([1]);
+	t.is(deserialized instanceof Error, true);
+	t.is(deserialized.message, 'unknown');
+});
+
+test('should deserialize plain object', t => {
+	const object = {
+		message: 'error message',
+		stack: 'at <anonymous>:1:13',
+		name: 'name',
+		code: 'code'
+	};
+
+	const deserialized = deserializeError(object);
+	t.is(deserialized instanceof Error, true);
+	t.is(deserialized.message, 'error message');
+	t.is(deserialized.stack, 'at <anonymous>:1:13');
+	t.is(deserialized.name, 'name');
+	t.is(deserialized.code, 'code');
 });

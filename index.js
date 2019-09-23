@@ -1,5 +1,12 @@
 'use strict';
 
+const commonProperties = [
+	'name',
+	'message',
+	'stack',
+	'code'
+];
+
 const destroyCircular = (from, seen) => {
 	const to = Array.isArray(from) ? [] : {};
 
@@ -22,13 +29,6 @@ const destroyCircular = (from, seen) => {
 
 		to[key] = '[Circular]';
 	}
-
-	const commonProperties = [
-		'name',
-		'message',
-		'stack',
-		'code'
-	];
 
 	for (const property of commonProperties) {
 		if (typeof from[property] === 'string') {
@@ -53,6 +53,29 @@ const serializeError = value => {
 	return value;
 };
 
-module.exports = serializeError;
+const deserializeError = error => {
+	if (error instanceof Error) {
+		return error;
+	}
+
+	if (error && typeof error === 'object' && !Array.isArray(error)) {
+		const err = new Error();
+		for (const property of commonProperties) {
+			err[property] = error[property];
+		}
+
+		return err;
+	}
+
+	return new Error('unknown');
+};
+
+module.exports = {
+	serializeError,
+	deserializeError
+};
 // TODO: Remove this for the next major release
-module.exports.default = serializeError;
+module.exports.default = {
+	serializeError,
+	deserializeError
+};

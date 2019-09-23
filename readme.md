@@ -15,17 +15,21 @@ $ npm install serialize-error
 ## Usage
 
 ```js
-const serializeError = require('serialize-error');
+const { serializeError, deserializeError } = require('serialize-error');
 
 const error = new Error('🦄');
 
 console.log(error);
 //=> [Error: 🦄]
 
-console.log(serializeError(error));
-//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
-```
+const serialized = serializeError(error)
 
+console.log(serialized);
+//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
+
+const deserialized = deserializeError(serialized);
+//=> [Error: 🦄]
+```
 
 ## License
 
