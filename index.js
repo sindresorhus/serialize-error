@@ -1,4 +1,13 @@
 'use strict';
+const {inspect} = require('util');
+
+class NonError extends Error {
+	constructor(message) {
+		super(inspect(message));
+		this.name = 'NonError';
+		Error.captureStackTrace(this, NonError);
+	}
+}
 
 const commonProperties = [
 	'name',
@@ -7,8 +16,8 @@ const commonProperties = [
 	'code'
 ];
 
-const destroyCircular = (from, seen) => {
-	const to = Array.isArray(from) ? [] : {};
+const destroyCircular = (from, seen, to_) => {
+	const to = to_ || (Array.isArray(from) ? [] : {});
 
 	seen.push(from);
 
@@ -53,29 +62,21 @@ const serializeError = value => {
 	return value;
 };
 
-const deserializeError = error => {
-	if (error instanceof Error) {
-		return error;
+const deserializeError = value => {
+	if (value instanceof Error) {
+		return value;
 	}
 
-	if (error && typeof error === 'object' && !Array.isArray(error)) {
-		const err = new Error();
-		for (const property of commonProperties) {
-			err[property] = error[property];
-		}
-
-		return err;
+	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+		const newError = new Error();
+		destroyCircular(value, [], newError);
+		return newError;
 	}
 
-	return new Error('unknown');
+	return new NonError(value);
 };
 
 module.exports = {
-	serializeError,
-	deserializeError
-};
-// TODO: Remove this for the next major release
-module.exports.default = {
 	serializeError,
 	deserializeError
 };

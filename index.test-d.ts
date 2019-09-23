@@ -1,5 +1,5 @@
 import {expectType} from 'tsd';
-import {ErrorObject, serializeError, deserializeError} from '.';
+import {serializeError, deserializeError, ErrorObject} from '.';
 
 const error = new Error('unicorn');
 

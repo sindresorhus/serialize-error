@@ -1,7 +1,7 @@
 {
 	"name": "serialize-error",
 	"version": "4.1.0",
-	"description": "Serialize an error into a plain object",
+	"description": "Serialize/deserialize an error into a plain object",
 	"license": "MIT",
 	"repository": "sindresorhus/serialize-error",
 	"author": {
@@ -26,14 +26,15 @@
 		"object",
 		"convert",
 		"process",
-		"send"
+		"send",
+		"deserialize"
 	],
 	"dependencies": {
-		"type-fest": "^0.3.0"
+		"type-fest": "^0.8.0"
 	},
 	"devDependencies": {
-		"ava": "^1.4.1",
-		"tsd": "^0.7.1",
+		"ava": "^2.4.0",
+		"tsd": "^0.8.0",
 		"xo": "^0.24.0"
 	}
 }

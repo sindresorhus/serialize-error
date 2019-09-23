@@ -1,52 +1,56 @@
 import {Primitive, JsonObject} from 'type-fest';
 
-declare namespace serializeError {
-	type ErrorObject = {
-		name?: string;
-		stack?: string;
-		message?: string;
-		code?: string;
-	} & JsonObject;
+export type ErrorObject = {
+	name?: string;
+	stack?: string;
+	message?: string;
+	code?: string;
+} & JsonObject;
 
-	const serializeError: {
-		/**
-		Serialize an error into a plain object.
+/**
+Serialize an `Error` object into a plain object.
 
-		@example
-		```
-		import {serializeError} = require('serialize-error');
+Non-error values are passed through.
+Custom properties are preserved.
+Circular references are handled.
 
-		const error = new Error('🦄');
+@example
+```
+import {serializeError} from 'serialize-error';
 
-		console.log(error);
-		//=> [Error: 🦄]
+const error = new Error('🦄');
 
-		console.log(serializeError(error));
-		//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
-		```
-		*/
-		<ErrorType>(error: ErrorType): ErrorType extends Primitive
-			? ErrorType
-			: ErrorObject;
-	};
+console.log(error);
+//=> [Error: 🦄]
 
-	const deserializeError: {
-		/**
-		Deserialize into a plain object into an error.
+console.log(serializeError(error));
+//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
+```
+*/
+export function serializeError<ErrorType>(error: ErrorType): ErrorType extends Primitive
+	? ErrorType
+	: ErrorObject;
 
-		@example
-		```
-		import {deserializeError} = require('serialize-error');
+/**
+Deserialize a plain object or any value into an `Error` object.
 
-		const error = deserializeError(errorObject);
+`Error` objects are passed through.
+Non-error values are wrapped in a `NonError` error.
+Custom properties are preserved.
+Circular references are handled.
 
-		console.log(error);
-		//=> Error: aaa
-			at <anonymous>:1:13
-		```
-		*/
-		(errorObject: ErrorObject): Error
-	}
-}
+@example
+```
+import {deserializeError} from 'serialize-error';
 
-export = serializeError;
+const error = deserializeError({
+	message: 'aaa',
+	stack: 'at <anonymous>:1:13'
+});
+
+console.log(error);
+// Error: aaa
+// at <anonymous>:1:13
+```
+*/
+export function deserializeError(errorObject: ErrorObject | unknown): Error;

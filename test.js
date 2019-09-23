@@ -111,26 +111,36 @@ test('should serialize nested errors', t => {
 
 test('should deserialize null', t => {
 	const deserialized = deserializeError(null);
-	t.is(deserialized instanceof Error, true);
-	t.is(deserialized.message, 'unknown');
+	t.true(deserialized instanceof Error);
+	t.is(deserialized.message, 'null');
 });
 
 test('should deserialize number', t => {
 	const deserialized = deserializeError(1);
-	t.is(deserialized instanceof Error, true);
-	t.is(deserialized.message, 'unknown');
+	t.true(deserialized instanceof Error);
+	t.is(deserialized.message, '1');
 });
 
 test('should deserialize error', t => {
 	const deserialized = deserializeError(new Error('test'));
-	t.is(deserialized instanceof Error, true);
+	t.true(deserialized instanceof Error);
 	t.is(deserialized.message, 'test');
 });
 
 test('should deserialize array', t => {
 	const deserialized = deserializeError([1]);
-	t.is(deserialized instanceof Error, true);
-	t.is(deserialized.message, 'unknown');
+	t.true(deserialized instanceof Error);
+	t.is(deserialized.message, '[ 1 ]');
+});
+
+test('should deserialize and preserve existing properties', t => {
+	const deserialized = deserializeError({
+		message: 'foo',
+		customProperty: true
+	});
+	t.true(deserialized instanceof Error);
+	t.is(deserialized.message, 'foo');
+	t.true(deserialized.customProperty);
 });
 
 test('should deserialize plain object', t => {
