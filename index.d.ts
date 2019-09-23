@@ -14,7 +14,7 @@ declare namespace serializeError {
 
 		@example
 		```
-		import { serializeError } = require('serialize-error');
+		import {serializeError} = require('serialize-error');
 
 		const error = new Error('🦄');
 
@@ -36,7 +36,7 @@ declare namespace serializeError {
 
 		@example
 		```
-		import { deserializeError } = require('serialize-error');
+		import {deserializeError} = require('serialize-error');
 
 		const error = deserializeError(errorObject);
 
