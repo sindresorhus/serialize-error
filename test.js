@@ -115,27 +115,29 @@ test('should handle top-level null values', t => {
 });
 
 test('should deserialize null', t => {
-	const deserialized = deserializeError(null);
-	t.true(deserialized instanceof Error);
-	t.is(deserialized.message, 'null');
+	deserializeNonError(t, null);
 });
 
 test('should deserialize number', t => {
-	const deserialized = deserializeError(1);
-	t.true(deserialized instanceof Error);
-	t.is(deserialized.message, '1');
+	deserializeNonError(t, 1);
+});
+
+test('should deserialize boolean', t => {
+	deserializeNonError(t, true);
+});
+
+test('should deserialize string', t => {
+	deserializeNonError(t, '123');
+});
+
+test('should deserialize array', t => {
+	deserializeNonError(t, [1]);
 });
 
 test('should deserialize error', t => {
 	const deserialized = deserializeError(new Error('test'));
 	t.true(deserialized instanceof Error);
 	t.is(deserialized.message, 'test');
-});
-
-test('should deserialize array', t => {
-	const deserialized = deserializeError([1]);
-	t.true(deserialized instanceof Error);
-	t.is(deserialized.message, '[ 1 ]');
 });
 
 test('should deserialize and preserve existing properties', t => {
@@ -163,3 +165,10 @@ test('should deserialize plain object', t => {
 	t.is(deserialized.name, 'name');
 	t.is(deserialized.code, 'code');
 });
+
+function deserializeNonError(t, value) {
+	const deserialized = deserializeError(value);
+	t.true(deserialized instanceof Error);
+	t.is(deserialized.constructor.name, 'NonError');
+	t.is(deserialized.message, JSON.stringify(value));
+}

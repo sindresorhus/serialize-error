@@ -1,11 +1,20 @@
 'use strict';
-const {inspect} = require('util');
 
 class NonError extends Error {
 	constructor(message) {
-		super(inspect(message));
+		super(NonError.prepareSuperMessage(message));
 		this.name = 'NonError';
-		Error.captureStackTrace(this, NonError);
+		if (Error.captureStackTrace) {
+			Error.captureStackTrace(this, NonError);
+		}
+	}
+
+	static prepareSuperMessage(message) {
+		try {
+			return JSON.stringify(message);
+		} catch (error) { // "(error)" required to prevent "SyntaxError: Unexpected token {" error when running nodejs 8/9
+			return String(message);
+		}
 	}
 }
 
