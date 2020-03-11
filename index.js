@@ -1,11 +1,21 @@
 'use strict';
-const {inspect} = require('util');
 
 class NonError extends Error {
 	constructor(message) {
-		super(inspect(message));
+		super(NonError._prepareSuperMessage(message));
 		this.name = 'NonError';
-		Error.captureStackTrace(this, NonError);
+
+		if (Error.captureStackTrace) {
+			Error.captureStackTrace(this, NonError);
+		}
+	}
+
+	static _prepareSuperMessage(message) {
+		try {
+			return JSON.stringify(message);
+		} catch (_) {
+			return String(message);
+		}
 	}
 }
 
