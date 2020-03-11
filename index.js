@@ -2,17 +2,18 @@
 
 class NonError extends Error {
 	constructor(message) {
-		super(NonError.prepareSuperMessage(message));
+		super(NonError._prepareSuperMessage(message));
 		this.name = 'NonError';
+
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, NonError);
 		}
 	}
 
-	static prepareSuperMessage(message) {
+	static _prepareSuperMessage(message) {
 		try {
 			return JSON.stringify(message);
-		} catch (error) { // "(error)" required to prevent "SyntaxError: Unexpected token {" error when running nodejs 8/9
+		} catch (_) {
 			return String(message);
 		}
 	}
