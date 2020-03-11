@@ -4,13 +4,11 @@
 
 Useful if you for example need to `JSON.stringify()` or `process.send()` the error.
 
-
 ## Install
 
 ```
 $ npm install serialize-error
 ```
-
 
 ## Usage
 
