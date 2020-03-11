@@ -1,6 +1,13 @@
 import test from 'ava';
 import {serializeError, deserializeError} from '.';
 
+function deserializeNonError(t, value) {
+	const deserialized = deserializeError(value);
+	t.true(deserialized instanceof Error);
+	t.is(deserialized.constructor.name, 'NonError');
+	t.is(deserialized.message, JSON.stringify(value));
+}
+
 test('main', t => {
 	const serialized = serializeError(new Error('foo'));
 	const keys = Object.keys(serialized);
@@ -165,10 +172,3 @@ test('should deserialize plain object', t => {
 	t.is(deserialized.name, 'name');
 	t.is(deserialized.code, 'code');
 });
-
-function deserializeNonError(t, value) {
-	const deserialized = deserializeError(value);
-	t.true(deserialized instanceof Error);
-	t.is(deserialized.constructor.name, 'NonError');
-	t.is(deserialized.message, JSON.stringify(value));
-}
