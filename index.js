@@ -26,23 +26,28 @@ const commonProperties = [
 	'code'
 ];
 
-const destroyCircular = (from, seen, to_) => {
+const destroyCircular = (from, seen, to_, options) => {
 	const to = to_ || (Array.isArray(from) ? [] : {});
 
 	seen.push(from);
 
 	for (const [key, value] of Object.entries(from)) {
-		if (typeof value === 'function') {
+		let bufferSubstitutedValue = value;
+		if (value instanceof Buffer) {
+			bufferSubstitutedValue = getBufferValue(value, options);
+		}
+
+		if (typeof bufferSubstitutedValue === 'function') {
 			continue;
 		}
 
-		if (!value || typeof value !== 'object') {
-			to[key] = value;
+		if (bufferSubstitutedValue !== value || !bufferSubstitutedValue || typeof bufferSubstitutedValue !== 'object') {
+			to[key] = bufferSubstitutedValue;
 			continue;
 		}
 
 		if (!seen.includes(from[key])) {
-			to[key] = destroyCircular(from[key], seen.slice());
+			to[key] = destroyCircular(from[key], seen.slice(), null, options);
 			continue;
 		}
 
@@ -58,21 +63,38 @@ const destroyCircular = (from, seen, to_) => {
 	return to;
 };
 
-const serializeError = value => {
-	if (typeof value === 'object' && value !== null) {
-		return destroyCircular(value, []);
+const getBufferValue = (value, options) => {
+	if (options && options.serializeError && options.serializeError.buffer && options.serializeError.buffer.toStringEncoding) {
+		return value.toString(options.serializeError.buffer.toStringEncoding);
+	}
+
+	if (options && options.serializeError && options.serializeError.buffer && options.serializeError.buffer.toString) {
+		return value.toString();
+	}
+
+	return [...value];
+};
+
+const serialize = options => value => {
+	let bufferSubstitutedValue = value;
+	if (value instanceof Buffer) {
+		bufferSubstitutedValue = getBufferValue(bufferSubstitutedValue, options);
+	}
+
+	if (bufferSubstitutedValue === value && typeof bufferSubstitutedValue === 'object' && bufferSubstitutedValue !== null) {
+		return destroyCircular(bufferSubstitutedValue, [], null, options);
 	}
 
 	// People sometimes throw things besides Error objects…
-	if (typeof value === 'function') {
+	if (typeof bufferSubstitutedValue === 'function') {
 		// `JSON.stringify()` discards functions. We do too, unless a function is thrown directly.
-		return `[Function: ${(value.name || 'anonymous')}]`;
+		return `[Function: ${(bufferSubstitutedValue.name || 'anonymous')}]`;
 	}
 
-	return value;
+	return bufferSubstitutedValue;
 };
 
-const deserializeError = value => {
+const deserialize = () => value => {
 	if (value instanceof Error) {
 		return value;
 	}
@@ -87,6 +109,6 @@ const deserializeError = value => {
 };
 
 module.exports = {
-	serializeError,
-	deserializeError
+	serialize,
+	deserialize
 };

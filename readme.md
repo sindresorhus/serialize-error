@@ -2,7 +2,7 @@
 
 > Serialize/deserialize an error into a plain object
 
-Useful if you for example need to `JSON.stringify()` or `process.send()` the error.
+Useful if you for example need to `JSON.stringify()` or `process.send()` the error.  This library works in the browser and Node.js
 
 ## Install
 
@@ -13,7 +13,9 @@ $ npm install serialize-error
 ## Usage
 
 ```js
-const {serializeError, deserializeError} = require('serialize-error');
+const {serialize, deserialize} = require('serialize-error');
+const serializeError = serialize({});
+const deserializeError = deserialize({});
 
 const error = new Error('🦄');
 
@@ -27,6 +29,37 @@ console.log(serialized);
 
 const deserialized = deserializeError(serialized);
 //=> [Error: 🦄]
+```
+
+## Browser Use
+Use a <a href="https://github.com/feross/buffer">polyfill for `Buffer`</a>.
+## Options
+By default Buffers are not converted to strings.
+
+To configure Buffers to be converted to strings:
+```js
+const {serialize, deserialize} = require('serialize-error');
+const serializeError = serialize({ serializeError: { buffer: { toString: true } } } );
+const deserializeError = deserialize({});
+
+const err = new Error('🦄');
+err.buffer = Buffer.from('ABC', 'utf8');
+
+console.log(serializeError(err).buffer);
+//=>  [ 65, 66, 67 ]
+```
+
+If you wish to override the UTF-8 encoding, use one of the encodings supported by Buffer.toString ('hex', 'base64', 'latin1', etc.)
+```js
+const {serialize, deserialize} = require('serialize-error');
+const serializeError = serialize({ serializeError: { buffer: { toStringEncoding: 'hex' } } });
+const deserializeError = deserialize({});
+
+const err = new Error('🦄');
+err.buffer = Buffer.from('ABC', 'utf8');
+
+console.log(serializeError(err).buffer);
+//=>  0daa
 ```
 
 ## API

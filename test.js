@@ -1,5 +1,8 @@
 import test from 'ava';
-import {serializeError, deserializeError} from '.';
+import {serialize, deserialize} from '.';
+
+const serializeError = serialize();
+const deserializeError = deserialize();
 
 function deserializeNonError(t, value) {
 	const deserialized = deserializeError(value);
@@ -14,6 +17,45 @@ test('main', t => {
 	t.true(keys.includes('name'));
 	t.true(keys.includes('stack'));
 	t.true(keys.includes('message'));
+});
+
+test('converts Buffers to arrays on non-Errors by default', t => {
+	const buffer = Buffer.from('ABC', 'utf8');
+	const serialized = serializeError(buffer, null);
+	t.deepEqual(serialized, [...Buffer.from('ABC', 'utf8')]);
+});
+
+test('converts Buffers to arrays by default', t => {
+	const err = new Error('foo');
+	err.buffer = Buffer.from('ABC', 'utf8');
+	const serialized = serializeError(err);
+	t.deepEqual(serialized.buffer, [...Buffer.from('ABC', 'utf8')]);
+});
+
+test('converts Buffers to arrays by default in nested Errors', t => {
+	const err = new Error('foo');
+	err.child = {buffer: Buffer.from('ABC', 'utf8')};
+	const serialized = serializeError(err);
+	t.deepEqual(serialized.child.buffer, [...Buffer.from('ABC', 'utf8')]);
+});
+
+test('converts Buffers to strings when default is overridden', t => {
+	const options = {serializeError: {buffer: {toString: true}}};
+	const serializeErrorConvertBufferToString = serialize(options);
+
+	const err = new Error('foo');
+	err.buffer = Buffer.from('ABC', 'utf8');
+	const serialized = serializeErrorConvertBufferToString(err);
+	t.is(serialized.buffer, 'ABC');
+});
+
+test('converts Buffers to hex when configured to do so', t => {
+	const options = {serializeError: {buffer: {toStringEncoding: 'hex'}}};
+	const serializeErrorConvertBufferToHex = serialize(options);
+	const err = new Error('foo');
+	err.buffer = Buffer.from('0DAA', 'hex');
+	const serialized = serializeErrorConvertBufferToHex(err, options);
+	t.is(serialized.buffer, '0daa');
 });
 
 test('should destroy circular references', t => {
