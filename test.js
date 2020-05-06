@@ -10,10 +10,9 @@ function deserializeNonError(t, value) {
 
 test('main', t => {
 	const serialized = serializeError(new Error('foo'));
-	const keys = Object.keys(serialized);
-	t.true(keys.includes('name'));
-	t.true(keys.includes('stack'));
-	t.true(keys.includes('message'));
+	t.truthy(serialized.name);
+	t.truthy(serialized.stack);
+	t.truthy(serialized.message);
 });
 
 test('should destroy circular references', t => {
@@ -171,4 +170,18 @@ test('should deserialize plain object', t => {
 	t.is(deserialized.stack, 'at <anonymous>:1:13');
 	t.is(deserialized.name, 'name');
 	t.is(deserialized.code, 'code');
+});
+
+test('common properties should not be enumerable', t => {
+	const object = {
+		message: 'error message',
+		stack: 'at <anonymous>:1:13',
+		name: 'name',
+		code: 'code'
+	};
+
+	const deserialized = deserializeError(object);
+	const enumerableProps = Object.keys(deserialized);
+
+	t.true(enumerableProps.length === 0);
 });

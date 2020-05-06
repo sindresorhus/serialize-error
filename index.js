@@ -3,7 +3,10 @@
 class NonError extends Error {
 	constructor(message) {
 		super(NonError._prepareSuperMessage(message));
-		this.name = 'NonError';
+		Object.defineProperty(this, 'name', {
+			value: 'NonError',
+			enumerable: false
+		});
 
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, NonError);
@@ -51,7 +54,10 @@ const destroyCircular = (from, seen, to_) => {
 
 	for (const property of commonProperties) {
 		if (typeof from[property] === 'string') {
-			to[property] = from[property];
+			Object.defineProperty(to, property, {
+				value: from[property],
+				enumerable: false
+			});
 		}
 	}
 
