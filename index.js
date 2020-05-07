@@ -5,7 +5,9 @@ class NonError extends Error {
 		super(NonError._prepareSuperMessage(message));
 		Object.defineProperty(this, 'name', {
 			value: 'NonError',
-			enumerable: false
+			enumerable: false,
+			configurable: true,
+			writable: true
 		});
 
 		if (Error.captureStackTrace) {
@@ -23,10 +25,10 @@ class NonError extends Error {
 }
 
 const commonProperties = [
-	'name',
-	'message',
-	'stack',
-	'code'
+	{property: 'name', enumerable: false},
+	{property: 'message', enumerable: false},
+	{property: 'stack', enumerable: false},
+	{property: 'code', enumerable: true}
 ];
 
 const destroyCircular = (from, seen, to_) => {
@@ -52,11 +54,13 @@ const destroyCircular = (from, seen, to_) => {
 		to[key] = '[Circular]';
 	}
 
-	for (const property of commonProperties) {
+	for (const {property, enumerable} of commonProperties) {
 		if (typeof from[property] === 'string') {
 			Object.defineProperty(to, property, {
 				value: from[property],
-				enumerable: false
+				enumerable,
+				configurable: true,
+				writable: true
 			});
 		}
 	}
