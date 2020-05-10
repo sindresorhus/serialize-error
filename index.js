@@ -5,7 +5,6 @@ class NonError extends Error {
 		super(NonError._prepareSuperMessage(message));
 		Object.defineProperty(this, 'name', {
 			value: 'NonError',
-			enumerable: false,
 			configurable: true,
 			writable: true
 		});
