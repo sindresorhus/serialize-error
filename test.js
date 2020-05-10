@@ -10,10 +10,9 @@ function deserializeNonError(t, value) {
 
 test('main', t => {
 	const serialized = serializeError(new Error('foo'));
-	const keys = Object.keys(serialized);
-	t.true(keys.includes('name'));
-	t.true(keys.includes('stack'));
-	t.true(keys.includes('message'));
+	t.true('name' in serialized);
+	t.true('stack' in serialized);
+	t.true('message' in serialized);
 });
 
 test('should destroy circular references', t => {
@@ -171,4 +170,33 @@ test('should deserialize plain object', t => {
 	t.is(deserialized.stack, 'at <anonymous>:1:13');
 	t.is(deserialized.name, 'name');
 	t.is(deserialized.code, 'code');
+});
+
+test('name, stack and message should not be enumerable, other props should be', t => {
+	const object = {
+		message: 'error message',
+		stack: 'at <anonymous>:1:13',
+		name: 'name'
+	};
+	const nonEnumerableProps = Object.keys(object);
+
+	const enumerables = {
+		code: 'code',
+		path: './path',
+		errno: 1,
+		syscall: 'syscall',
+		randomProperty: 'random'
+	};
+	const enumerableProps = Object.keys(enumerables);
+
+	const deserialized = deserializeError({...object, ...enumerables});
+	const deserializedEnumerableProps = Object.keys(deserialized);
+
+	for (const prop of nonEnumerableProps) {
+		t.false(deserializedEnumerableProps.includes(prop));
+	}
+
+	for (const prop of enumerableProps) {
+		t.true(deserializedEnumerableProps.includes(prop));
+	}
 });

@@ -39,6 +39,8 @@ Serialize an `Error` object into a plain object.
 
 Non-error values are passed through.
 Custom properties are preserved.
+Non-enumerable properties are kept non-enumerable (name, message, stack).
+Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
 Circular references are handled.
 
 ### deserializeError(value)
