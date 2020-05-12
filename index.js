@@ -30,7 +30,7 @@ const commonProperties = [
 	{property: 'code', enumerable: true}
 ];
 
-const destroyCircular = (from, seen, to_) => {
+const destroyCircular = ({from, seen, to_, forceEnumerable}) => {
 	const to = to_ || (Array.isArray(from) ? [] : {});
 
 	seen.push(from);
@@ -46,7 +46,7 @@ const destroyCircular = (from, seen, to_) => {
 		}
 
 		if (!seen.includes(from[key])) {
-			to[key] = destroyCircular(from[key], seen.slice());
+			to[key] = destroyCircular({from: from[key], seen: seen.slice(), forceEnumerable});
 			continue;
 		}
 
@@ -57,7 +57,7 @@ const destroyCircular = (from, seen, to_) => {
 		if (typeof from[property] === 'string') {
 			Object.defineProperty(to, property, {
 				value: from[property],
-				enumerable,
+				enumerable: forceEnumerable ? true : enumerable,
 				configurable: true,
 				writable: true
 			});
@@ -69,7 +69,7 @@ const destroyCircular = (from, seen, to_) => {
 
 const serializeError = value => {
 	if (typeof value === 'object' && value !== null) {
-		return destroyCircular(value, []);
+		return destroyCircular({from: value, seen: [], forceEnumerable: true});
 	}
 
 	// People sometimes throw things besides Error objects…
@@ -88,7 +88,7 @@ const deserializeError = value => {
 
 	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
 		const newError = new Error();
-		destroyCircular(value, [], newError);
+		destroyCircular({from: value, seen: [], to_: newError});
 		return newError;
 	}
 
