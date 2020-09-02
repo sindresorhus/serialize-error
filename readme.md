@@ -26,6 +26,8 @@ console.log(serialized);
 //=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
 
 const deserialized = deserializeError(serialized);
+
+console.log(deserialized);
 //=> [Error: 🦄]
 ```
 
