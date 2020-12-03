@@ -30,10 +30,31 @@ const commonProperties = [
 	{property: 'code', enumerable: true}
 ];
 
-const destroyCircular = ({from, seen, to_, forceEnumerable}) => {
+const called = Symbol('.toJSON called');
+
+const shouldCallToJSON = from => typeof from.toJSON === 'function' && from[called] !== true;
+
+const toJSON = from => {
+	from[called] = true;
+	const json = from.toJSON();
+	delete from[called];
+	return json;
+};
+
+const destroyCircular = ({
+	from,
+	seen,
+	to_,
+	forceEnumerable,
+	allowToJSON = false
+}) => {
 	const to = to_ || (Array.isArray(from) ? [] : {});
 
 	seen.push(from);
+
+	if (allowToJSON === true && shouldCallToJSON(from)) {
+		return toJSON(from);
+	}
 
 	for (const [key, value] of Object.entries(from)) {
 		if (typeof value === 'function') {
@@ -46,7 +67,12 @@ const destroyCircular = ({from, seen, to_, forceEnumerable}) => {
 		}
 
 		if (!seen.includes(from[key])) {
-			to[key] = destroyCircular({from: from[key], seen: seen.slice(), forceEnumerable});
+			to[key] = destroyCircular({
+				from: from[key],
+				seen: seen.slice(),
+				forceEnumerable,
+				allowToJSON
+			});
 			continue;
 		}
 
@@ -67,9 +93,15 @@ const destroyCircular = ({from, seen, to_, forceEnumerable}) => {
 	return to;
 };
 
-const serializeError = value => {
+const serializeError = (value, options = {}) => {
+	const {allowToJSON = false} = options;
 	if (typeof value === 'object' && value !== null) {
-		return destroyCircular({from: value, seen: [], forceEnumerable: true});
+		return destroyCircular({
+			from: value,
+			seen: [],
+			forceEnumerable: true,
+			allowToJSON
+		});
 	}
 
 	// People sometimes throw things besides Error objects…

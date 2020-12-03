@@ -33,7 +33,7 @@ console.log(deserialized);
 
 ## API
 
-### serializeError(value)
+### serializeError(value, options?)
 
 Type: `Error | unknown`
 
@@ -44,6 +44,37 @@ Custom properties are preserved.
 Non-enumerable properties are kept non-enumerable (name, message, stack).
 Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
 Circular references are handled.
+
+#### options
+
+##### allowToJSON
+
+Type: `Boolean`, default: `false`
+
+If `true` and if the input object contains `.toJSON()` then its result will be returned instead of object properties.
+
+It's up on `.toJSON()` implementation to handle circular references and enumerability of the properties.
+
+Example:
+
+```js
+const date = {date: new Date(0)};
+serializeError(date);
+// => {}
+serializeError(date, {allowToJSON: true});
+// => {date: '1970-01-01T00:00:00.000Z'}
+
+const obj = {
+    foo: 'bar',
+    toJSON() {
+        return serializeError(this);
+    }
+};
+serializeError(obj);
+// => {foo: 'bar'}
+serializeError(obj, {allowToJSON: true});
+// => {foo: 'bar'}
+```
 
 ### deserializeError(value)
 
