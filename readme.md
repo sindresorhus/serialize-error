@@ -58,22 +58,33 @@ It's up on `.toJSON()` implementation to handle circular references and enumerab
 Example:
 
 ```js
-const date = {date: new Date(0)};
-serializeError(date);
-// => {}
-serializeError(date, {allowToJSON: true});
-// => {date: '1970-01-01T00:00:00.000Z'}
-
-const obj = {
-    foo: 'bar',
-    toJSON() {
-        return serializeError(this);
+class ErrorWithDate extends Error {
+    constructor() {
+        super()
+        this.date = new Date(0)
     }
-};
-serializeError(obj);
-// => {foo: 'bar'}
-serializeError(obj, {allowToJSON: true});
-// => {foo: 'bar'}
+}
+const error = new ErrorWithDate()
+serializeError(date);
+// => {date: {}, name, message, stack}
+serializeError(date, {allowToJSON: true});
+// => {date: '1970-01-01T00:00:00.000Z', name, message, stack}
+
+class ErrorWithToJSON extends Error {
+    constructor() {
+        super('🦄');
+        this.date = new Date(0);
+    }
+
+    toJSON() {
+        return serializeError(this); // this.date will be serialized as `{}`
+    }
+}
+const err = new ErrorWithToJSON();
+console.log(serializeError(err));
+// => {date: {}, message: '🦄', name, stack}
+console.log(serializeError(err, {allowToJSON: true}));
+// => {date: {}, message: '🦄', name, stack}
 ```
 
 ### deserializeError(value)

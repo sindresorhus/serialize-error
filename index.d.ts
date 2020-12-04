@@ -34,12 +34,18 @@ console.log(error);
 console.log(serializeError(error));
 //=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
 
-const date = {date: new Date(0)};
-console.log(serializeError(date));
-// => {}
+class ErrorWithDate extends Error {
+    constructor() {
+        super()
+        this.date = new Date(0)
+    }
+}
+const error = new ErrorWithDate()
+console.log(serializeError(error));
+//=> {date: {}, name, message, stack}
 
-console.log(serializeError(date, {allowToJSON: true}));
-// => {date: '1970-01-01T00:00:00.000Z'}
+console.log(serializeError(error, {allowToJSON: true}));
+//=> {date: '1970-01-01T00:00:00.000Z', name, message, stack}
 ```
 */
 export function serializeError<ErrorType>(error: ErrorType, option?: Options): ErrorType extends Primitive
