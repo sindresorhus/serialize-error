@@ -40,7 +40,7 @@ const destroyCircular = ({from, seen, to_, forceEnumerable}) => {
 			to[key] = '[Buffer]';
 			continue;
 		}
-		
+
 		if (typeof value === 'function') {
 			continue;
 		}
