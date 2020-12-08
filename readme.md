@@ -43,6 +43,7 @@ Non-error values are passed through.
 Custom properties are preserved.
 Non-enumerable properties are kept non-enumerable (name, message, stack).
 Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
+Beffer properties are replaced with [Buffer].
 Circular references are handled.
 
 ### deserializeError(value)
