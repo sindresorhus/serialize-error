@@ -75,7 +75,7 @@ test('should discard nested functions', t => {
 	t.deepEqual(serialized, {});
 });
 
-test('should discard nested buffers', t => {
+test('should discard buffers', t => {
 	const object = {a: Buffer.alloc(1)};
 	const serialized = serializeError(object);
 	t.deepEqual(serialized, {a: '[Buffer]'});
