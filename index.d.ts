@@ -12,7 +12,7 @@ Serialize an `Error` object into a plain object.
 
 Non-error values are passed through.
 Custom properties are preserved.
-Buffer properties are discarded.
+Buffer properties are replaced with `[object Buffer]`.
 Circular references are handled.
 
 @example
