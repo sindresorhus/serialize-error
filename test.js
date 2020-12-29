@@ -203,15 +203,9 @@ test('deserialized name, stack and message should not be enumerable, other props
 	}
 });
 
-test('should serialize Date as empty object', t => {
-	const date = {date: new Date(0)};
-	const serialized = serializeError(date);
-	t.deepEqual(serialized, {date: {}});
-});
-
 test('should serialize Date as ISO string', t => {
 	const date = {date: new Date(0)};
-	const serialized = serializeError(date, {allowToJSON: true});
+	const serialized = serializeError(date);
 	t.deepEqual(serialized, {date: '1970-01-01T00:00:00.000Z'});
 });
 
@@ -231,20 +225,12 @@ test('should serialize custom error with `.toJSON`', t => {
 		}
 	}
 	const err = new CustomError();
-	const serialized = serializeError(err, {allowToJSON: true});
+	const serialized = serializeError(err);
 	t.deepEqual(serialized, {
 		message: 'foo',
 		amount: '$10'
 	});
 	t.true(serialized.stack === undefined);
-
-	const serializedDefault = serializeError(err);
-	const {stack, ...rest} = serializedDefault;
-	t.deepEqual(rest, {
-		message: 'foo',
-		name: 'CustomError',
-		value: 10
-	});
 });
 
 test('should serialize custom error with a property having `.toJSON`', t => {
@@ -264,7 +250,7 @@ test('should serialize custom error with a property having `.toJSON`', t => {
 		}
 	};
 	const err = new CustomError(value);
-	const serialized = serializeError(err, {allowToJSON: true});
+	const serialized = serializeError(err);
 	const {stack, ...rest} = serialized;
 	t.deepEqual(rest, {
 		message: 'foo',
@@ -289,7 +275,7 @@ test('should serialize custom error with `.toJSON` defined with `serializeError`
 		}
 	}
 	const err = new CustomError();
-	const serialized = serializeError(err, {allowToJSON: true});
+	const serialized = serializeError(err);
 	const {stack, ...rest} = serialized;
 	t.deepEqual(rest, {
 		message: 'foo',
@@ -297,6 +283,4 @@ test('should serialize custom error with `.toJSON` defined with `serializeError`
 		value: 30
 	});
 	t.true(stack !== undefined);
-	const serializedDefault = serializeError(err);
-	t.deepEqual(serialized, serializedDefault);
 });

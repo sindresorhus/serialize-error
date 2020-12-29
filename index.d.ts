@@ -7,14 +7,6 @@ export type ErrorObject = {
 	code?: string;
 } & JsonObject;
 
-interface Options {
-	/**
-	Allow using `.toJSON()`.
-	@default false
-	*/
-	readonly allowToJSON?: boolean;
-}
-
 /**
 Serialize an `Error` object into a plain object.
 
@@ -41,14 +33,12 @@ class ErrorWithDate extends Error {
     }
 }
 const error = new ErrorWithDate()
-console.log(serializeError(error));
-//=> {date: {}, name, message, stack}
 
-console.log(serializeError(error, {allowToJSON: true}));
+console.log(serializeError(error));
 //=> {date: '1970-01-01T00:00:00.000Z', name, message, stack}
 ```
 */
-export function serializeError<ErrorType>(error: ErrorType, option?: Options): ErrorType extends Primitive
+export function serializeError<ErrorType>(error: ErrorType): ErrorType extends Primitive
 	? ErrorType
 	: ErrorObject;
 

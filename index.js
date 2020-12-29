@@ -32,8 +32,6 @@ const commonProperties = [
 
 const called = Symbol('.toJSON called');
 
-const shouldCallToJSON = from => typeof from.toJSON === 'function' && from[called] !== true;
-
 const toJSON = from => {
 	from[called] = true;
 	const json = from.toJSON();
@@ -45,14 +43,13 @@ const destroyCircular = ({
 	from,
 	seen,
 	to_,
-	forceEnumerable,
-	allowToJSON = false
+	forceEnumerable
 }) => {
 	const to = to_ || (Array.isArray(from) ? [] : {});
 
 	seen.push(from);
 
-	if (allowToJSON === true && shouldCallToJSON(from)) {
+	if (typeof from.toJSON === 'function' && from[called] !== true) {
 		return toJSON(from);
 	}
 
@@ -70,8 +67,7 @@ const destroyCircular = ({
 			to[key] = destroyCircular({
 				from: from[key],
 				seen: seen.slice(),
-				forceEnumerable,
-				allowToJSON
+				forceEnumerable
 			});
 			continue;
 		}
@@ -93,14 +89,12 @@ const destroyCircular = ({
 	return to;
 };
 
-const serializeError = (value, options = {}) => {
-	const {allowToJSON = false} = options;
+const serializeError = value => {
 	if (typeof value === 'object' && value !== null) {
 		return destroyCircular({
 			from: value,
 			seen: [],
-			forceEnumerable: true,
-			allowToJSON
+			forceEnumerable: true
 		});
 	}
 
