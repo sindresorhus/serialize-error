@@ -1,4 +1,4 @@
-# serialize-error [![Build Status](https://travis-ci.org/sindresorhus/serialize-error.svg?branch=master)](https://travis-ci.org/sindresorhus/serialize-error)
+# serialize-error
 
 > Serialize/deserialize an error into a plain object
 
