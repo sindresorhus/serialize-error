@@ -36,6 +36,11 @@ const destroyCircular = ({from, seen, to_, forceEnumerable}) => {
 	seen.push(from);
 
 	for (const [key, value] of Object.entries(from)) {
+		if (Buffer.isBuffer(value)) {
+			to[key] = '[object Buffer]';
+			continue;
+		}
+
 		if (typeof value === 'function') {
 			continue;
 		}
