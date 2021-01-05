@@ -30,12 +30,12 @@ const commonProperties = [
 	{property: 'code', enumerable: true}
 ];
 
-const called = Symbol('.toJSON called');
+const isCalled = Symbol('.toJSON called');
 
 const toJSON = from => {
-	from[called] = true;
+	from[isCalled] = true;
 	const json = from.toJSON();
-	delete from[called];
+	delete from[isCalled];
 	return json;
 };
 
@@ -49,7 +49,7 @@ const destroyCircular = ({
 
 	seen.push(from);
 
-	if (typeof from.toJSON === 'function' && from[called] !== true) {
+	if (typeof from.toJSON === 'function' && from[isCalled] !== true) {
 		return toJSON(from);
 	}
 

@@ -13,6 +13,8 @@ Serialize an `Error` object into a plain object.
 Non-error values are passed through.
 Custom properties are preserved.
 Circular references are handled.
+If the input object has a `.toJSON()` method, then it's called instead of serializing the object's properties.
+It's up on `.toJSON()` implementation to handle circular references and enumerability of the properties.
 
 @example
 ```
@@ -28,14 +30,28 @@ console.log(serializeError(error));
 
 class ErrorWithDate extends Error {
     constructor() {
-        super()
-        this.date = new Date(0)
+        super();
+        this.date = new Date();
     }
 }
-const error = new ErrorWithDate()
+const error = new ErrorWithDate();
 
 console.log(serializeError(error));
 //=> {date: '1970-01-01T00:00:00.000Z', name, message, stack}
+
+class ErrorWithToJSON extends Error {
+    constructor() {
+        super('🦄');
+        this.date = new Date();
+    }
+
+    toJSON() {
+        return serializeError(this);
+    }
+}
+const error = new ErrorWithToJSON();
+console.log(serializeError(error));
+// => {date: '1970-01-01T00:00:00.000Z', message: '🦄', name, stack}
 ```
 */
 export function serializeError<ErrorType>(error: ErrorType): ErrorType extends Primitive

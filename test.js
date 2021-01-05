@@ -224,8 +224,8 @@ test('should serialize custom error with `.toJSON`', t => {
 			};
 		}
 	}
-	const err = new CustomError();
-	const serialized = serializeError(err);
+	const error = new CustomError();
+	const serialized = serializeError(error);
 	t.deepEqual(serialized, {
 		message: 'foo',
 		amount: '$10'
@@ -249,8 +249,8 @@ test('should serialize custom error with a property having `.toJSON`', t => {
 			};
 		}
 	};
-	const err = new CustomError(value);
-	const serialized = serializeError(err);
+	const error = new CustomError(value);
+	const serialized = serializeError(error);
 	const {stack, ...rest} = serialized;
 	t.deepEqual(rest, {
 		message: 'foo',
@@ -259,7 +259,7 @@ test('should serialize custom error with a property having `.toJSON`', t => {
 			amount: '$20'
 		}
 	});
-	t.true(stack !== undefined);
+	t.not(stack, undefined);
 });
 
 test('should serialize custom error with `.toJSON` defined with `serializeError`', t => {
@@ -274,13 +274,13 @@ test('should serialize custom error with `.toJSON` defined with `serializeError`
 			return serializeError(this);
 		}
 	}
-	const err = new CustomError();
-	const serialized = serializeError(err);
+	const error = new CustomError();
+	const serialized = serializeError(error);
 	const {stack, ...rest} = serialized;
 	t.deepEqual(rest, {
 		message: 'foo',
 		name: 'CustomError',
 		value: 30
 	});
-	t.true(stack !== undefined);
+	t.not(stack, undefined);
 });

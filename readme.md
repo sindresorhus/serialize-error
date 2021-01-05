@@ -44,7 +44,7 @@ Custom properties are preserved.
 Non-enumerable properties are kept non-enumerable (name, message, stack).
 Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
 Circular references are handled.
-If the input object contains `.toJSON()` then its result will be returned instead of object properties.
+If the input object has a `.toJSON()` method, then it's called instead of serializing the object's properties.
 It's up on `.toJSON()` implementation to handle circular references and enumerability of the properties.
 
 `.toJSON` example:
@@ -52,26 +52,26 @@ It's up on `.toJSON()` implementation to handle circular references and enumerab
 ```js
 class ErrorWithDate extends Error {
     constructor() {
-        super()
-        this.date = new Date(0)
+        super();
+        this.date = new Date();
     }
 }
-const error = new ErrorWithDate()
+const error = new ErrorWithDate();
 serializeError(date);
 // => {date: '1970-01-01T00:00:00.000Z', name, message, stack}
 
 class ErrorWithToJSON extends Error {
     constructor() {
         super('🦄');
-        this.date = new Date(0);
+        this.date = new Date();
     }
 
     toJSON() {
         return serializeError(this);
     }
 }
-const err = new ErrorWithToJSON();
-console.log(serializeError(err));
+const error = new ErrorWithToJSON();
+console.log(serializeError(error));
 // => {date: '1970-01-01T00:00:00.000Z', message: '🦄', name, stack}
 ```
 
