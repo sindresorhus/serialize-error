@@ -45,7 +45,7 @@ Non-enumerable properties are kept non-enumerable (name, message, stack).
 Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
 Circular references are handled.
 If the input object has a `.toJSON()` method, then it's called instead of serializing the object's properties.
-It's up on `.toJSON()` implementation to handle circular references and enumerability of the properties.
+It's up to `.toJSON()` implementation to handle circular references and enumerability of the properties.
 
 `.toJSON` example:
 
