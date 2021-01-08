@@ -1,5 +1,5 @@
 import test from 'ava';
-import {serializeError, deserializeError} from '.';
+import {serializeError, deserializeError} from './index.js';
 
 function deserializeNonError(t, value) {
 	const deserialized = deserializeError(value);

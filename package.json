@@ -31,11 +31,11 @@
 		"deserialize"
 	],
 	"dependencies": {
-		"type-fest": "^0.13.1"
+		"type-fest": "^0.20.2"
 	},
 	"devDependencies": {
 		"ava": "^2.4.0",
-		"tsd": "^0.11.0",
-		"xo": "^0.30.0"
+		"tsd": "^0.14.0",
+		"xo": "^0.37.1"
 	}
 }

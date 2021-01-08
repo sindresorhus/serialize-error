@@ -30,10 +30,10 @@ console.log(serializeError(error));
 //=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
 
 class ErrorWithDate extends Error {
-    constructor() {
-        super();
-        this.date = new Date();
-    }
+	constructor() {
+		super();
+		this.date = new Date();
+	}
 }
 const error = new ErrorWithDate();
 
@@ -41,14 +41,14 @@ console.log(serializeError(error));
 //=> {date: '1970-01-01T00:00:00.000Z', name, message, stack}
 
 class ErrorWithToJSON extends Error {
-    constructor() {
-        super('🦄');
-        this.date = new Date();
-    }
+	constructor() {
+		super('🦄');
+		this.date = new Date();
+	}
 
-    toJSON() {
-        return serializeError(this);
-    }
+	toJSON() {
+		return serializeError(this);
+	}
 }
 const error = new ErrorWithToJSON();
 console.log(serializeError(error));

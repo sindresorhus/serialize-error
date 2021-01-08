@@ -17,7 +17,7 @@ class NonError extends Error {
 	static _prepareSuperMessage(message) {
 		try {
 			return JSON.stringify(message);
-		} catch (_) {
+		} catch {
 			return String(message);
 		}
 	}
@@ -118,7 +118,7 @@ const deserializeError = value => {
 	}
 
 	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-		const newError = new Error();
+		const newError = new Error(); // eslint-disable-line unicorn/error-message
 		destroyCircular({from: value, seen: [], to_: newError});
 		return newError;
 	}
