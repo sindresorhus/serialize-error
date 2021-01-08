@@ -30,10 +30,28 @@ const commonProperties = [
 	{property: 'code', enumerable: true}
 ];
 
-const destroyCircular = ({from, seen, to_, forceEnumerable}) => {
+const isCalled = Symbol('.toJSON called');
+
+const toJSON = from => {
+	from[isCalled] = true;
+	const json = from.toJSON();
+	delete from[isCalled];
+	return json;
+};
+
+const destroyCircular = ({
+	from,
+	seen,
+	to_,
+	forceEnumerable
+}) => {
 	const to = to_ || (Array.isArray(from) ? [] : {});
 
 	seen.push(from);
+
+	if (typeof from.toJSON === 'function' && from[isCalled] !== true) {
+		return toJSON(from);
+	}
 
 	for (const [key, value] of Object.entries(from)) {
 		if (Buffer.isBuffer(value)) {
@@ -51,7 +69,11 @@ const destroyCircular = ({from, seen, to_, forceEnumerable}) => {
 		}
 
 		if (!seen.includes(from[key])) {
-			to[key] = destroyCircular({from: from[key], seen: seen.slice(), forceEnumerable});
+			to[key] = destroyCircular({
+				from: from[key],
+				seen: seen.slice(),
+				forceEnumerable
+			});
 			continue;
 		}
 
@@ -74,7 +96,11 @@ const destroyCircular = ({from, seen, to_, forceEnumerable}) => {
 
 const serializeError = value => {
 	if (typeof value === 'object' && value !== null) {
-		return destroyCircular({from: value, seen: [], forceEnumerable: true});
+		return destroyCircular({
+			from: value,
+			seen: [],
+			forceEnumerable: true
+		});
 	}
 
 	// People sometimes throw things besides Error objects…
