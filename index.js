@@ -54,7 +54,7 @@ const destroyCircular = ({
 	}
 
 	for (const [key, value] of Object.entries(from)) {
-		if (Buffer.isBuffer(value)) {
+		if (typeof Buffer === 'function' && Buffer.isBuffer(value)) {
 			to[key] = '[object Buffer]';
 			continue;
 		}
