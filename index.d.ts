@@ -7,6 +7,27 @@ export type ErrorObject = {
 	code?: string;
 } & JsonObject;
 
+export interface Options {
+	/**
+	Specifies the maximum depth of properties to copy when serializing/deserializing
+	@default Number.POSITIVE_INFINITY
+	@example
+	```
+	import {serializeError} from 'serialize-error';
+
+	const error = new Error('🦄');
+	error.one = { two: { three: {}}};
+
+	console.log(serializeError(error, {maxDepth: 1}));
+	//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …', one: {}}
+
+	console.log(serializeError(error, {maxDepth: 2}));
+	//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …', one: { two: {}}}
+	```
+	 */
+	readonly maxDepth: number;
+}
+
 /**
 Serialize an `Error` object into a plain object.
 
@@ -55,7 +76,7 @@ console.log(serializeError(error));
 // => {date: '1970-01-01T00:00:00.000Z', message: '🦄', name, stack}
 ```
 */
-export function serializeError<ErrorType>(error: ErrorType): ErrorType extends Primitive
+export function serializeError<ErrorType>(error: ErrorType, options?: Options): ErrorType extends Primitive
 	? ErrorType
 	: ErrorObject;
 
@@ -83,4 +104,4 @@ console.log(error);
 // at <anonymous>:1:13
 ```
 */
-export function deserializeError(errorObject: ErrorObject | unknown): Error;
+export function deserializeError(errorObject: ErrorObject | unknown, options?: Options): Error;

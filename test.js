@@ -209,6 +209,41 @@ test('deserialized name, stack and message should not be enumerable, other props
 	}
 });
 
+test('should deserialize properties up to `Options.maxDepth` levels deep', t => {
+	const error = new Error('errorMessage');
+	const object = {
+		message: error.message,
+		name: error.name,
+		stack: error.stack,
+		one: {
+			two: {
+				three: {}
+			}
+		}
+	};
+
+	const levelZero = deserializeError(object, {maxDepth: 0});
+	const emptyError = new Error('test');
+	emptyError.message = '';
+	t.is(levelZero instanceof Error, true);
+	t.deepEqual(levelZero, emptyError);
+
+	const levelOne = deserializeError(object, {maxDepth: 1});
+	error.one = {};
+	t.is(levelOne instanceof Error, true);
+	t.deepEqual(levelOne, error);
+
+	const levelTwo = deserializeError(object, {maxDepth: 2});
+	error.one = {two: {}};
+	t.is(levelTwo instanceof Error, true);
+	t.deepEqual(levelTwo, error);
+
+	const levelThree = deserializeError(object, {maxDepth: 3});
+	error.one = {two: {three: {}}};
+	t.is(levelThree instanceof Error, true);
+	t.deepEqual(levelThree, error);
+});
+
 test('should serialize Date as ISO string', t => {
 	const date = {date: new Date(0)};
 	const serialized = serializeError(date);
@@ -289,4 +324,22 @@ test('should serialize custom error with `.toJSON` defined with `serializeError`
 		value: 30
 	});
 	t.not(stack, undefined);
+});
+
+test('should serialize properties up to `Options.maxDepth` levels deep', t => {
+	const error = new Error('errorMessage');
+	error.one = {two: {three: {}}};
+	const {message, name, stack} = error;
+
+	const levelZero = serializeError(error, {maxDepth: 0});
+	t.deepEqual(levelZero, {});
+
+	const levelOne = serializeError(error, {maxDepth: 1});
+	t.deepEqual(levelOne, {message, name, stack, one: {}});
+
+	const levelTwo = serializeError(error, {maxDepth: 2});
+	t.deepEqual(levelTwo, {message, name, stack, one: {two: {}}});
+
+	const levelThree = serializeError(error, {maxDepth: 3});
+	t.deepEqual(levelThree, {message, name, stack, one: {two: {three: {}}}});
 });

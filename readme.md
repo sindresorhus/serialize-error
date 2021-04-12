@@ -33,7 +33,7 @@ console.log(deserialized);
 
 ## API
 
-### serializeError(value)
+### serializeError(value, [options])
 
 Type: `Error | unknown`
 
@@ -76,7 +76,7 @@ console.log(serializeError(error));
 // => {date: '1970-01-01T00:00:00.000Z', message: '🦄', name, stack}
 ```
 
-### deserializeError(value)
+### deserializeError(value, [options])
 
 Type: `{[key: string]: unknown} | unknown`
 
@@ -86,3 +86,27 @@ Deserialize a plain object or any value into an `Error` object.
 Non-error values are wrapped in a `NonError` error.
 Custom properties are preserved.
 Circular references are handled.
+
+### options
+
+Type: `object`
+
+Options for `serializeError`/`deserializeError`
+
+Properties:
+
+| name     | type   | description                                                                      |
+|----------|--------|----------------------------------------------------------------------------------|
+| maxDepth | number | Specifies the maximum depth of properties to copy when serializing/deserializing |
+
+`maxDepth` example:
+```js
+const error = new Error('🦄');
+error.one = {two: { three: {}}};
+
+console.log(serializeError(error, {maxDepth: 1}));
+//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …', one: {}}
+
+console.log(serializeError(error, {maxDepth: 2}));
+//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …', one: { two: {}}}
+```
