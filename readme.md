@@ -33,7 +33,7 @@ console.log(deserialized);
 
 ## API
 
-### serializeError(value, [options])
+### serializeError(value, options?)
 
 Type: `Error | unknown`
 
@@ -76,7 +76,7 @@ console.log(serializeError(error));
 // => {date: '1970-01-01T00:00:00.000Z', message: '🦄', name, stack}
 ```
 
-### deserializeError(value, [options])
+### deserializeError(value, options?)
 
 Type: `{[key: string]: unknown} | unknown`
 
@@ -91,15 +91,13 @@ Circular references are handled.
 
 Type: `object`
 
-Options for `serializeError`/`deserializeError`
+#### maxDepth
 
-Properties:
+Type: `number`\
+Default: `Number.POSITIVE_INFINITY`
 
-| name     | type   | description                                                                      |
-|----------|--------|----------------------------------------------------------------------------------|
-| maxDepth | number | Specifies the maximum depth of properties to copy when serializing/deserializing |
+Specifies the maximum depth of properties to copy when serializing/deserializing
 
-`maxDepth` example:
 ```js
 const error = new Error('🦄');
 error.one = {two: { three: {}}};
