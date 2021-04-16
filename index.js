@@ -17,7 +17,7 @@ class NonError extends Error {
 	static _prepareSuperMessage(message) {
 		try {
 			return JSON.stringify(message);
-		} catch {
+		} catch (err) {
 			return String(message);
 		}
 	}
