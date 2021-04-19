@@ -43,11 +43,17 @@ const destroyCircular = ({
 	from,
 	seen,
 	to_,
-	forceEnumerable
+	forceEnumerable,
+	maxDepth,
+	depth
 }) => {
 	const to = to_ || (Array.isArray(from) ? [] : {});
 
 	seen.push(from);
+
+	if (depth >= maxDepth) {
+		return to;
+	}
 
 	if (typeof from.toJSON === 'function' && from[isCalled] !== true) {
 		return toJSON(from);
@@ -69,10 +75,14 @@ const destroyCircular = ({
 		}
 
 		if (!seen.includes(from[key])) {
+			depth++;
+
 			to[key] = destroyCircular({
 				from: from[key],
 				seen: seen.slice(),
-				forceEnumerable
+				forceEnumerable,
+				maxDepth,
+				depth
 			});
 			continue;
 		}
@@ -94,12 +104,16 @@ const destroyCircular = ({
 	return to;
 };
 
-const serializeError = value => {
+const serializeError = (value, options = {}) => {
+	const {maxDepth = Number.POSITIVE_INFINITY} = options;
+
 	if (typeof value === 'object' && value !== null) {
 		return destroyCircular({
 			from: value,
 			seen: [],
-			forceEnumerable: true
+			forceEnumerable: true,
+			maxDepth,
+			depth: 0
 		});
 	}
 
@@ -112,14 +126,22 @@ const serializeError = value => {
 	return value;
 };
 
-const deserializeError = value => {
+const deserializeError = (value, options = {}) => {
+	const {maxDepth = Number.POSITIVE_INFINITY} = options;
+
 	if (value instanceof Error) {
 		return value;
 	}
 
 	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
 		const newError = new Error(); // eslint-disable-line unicorn/error-message
-		destroyCircular({from: value, seen: [], to_: newError});
+		destroyCircular({
+			from: value,
+			seen: [],
+			to_: newError,
+			maxDepth,
+			depth: 0
+		});
 		return newError;
 	}
 
