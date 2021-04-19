@@ -27,7 +27,7 @@ export interface Options {
 	//=> {name: 'Error', message: '…', one: { two: {}}}
 	```
 	*/
-	readonly maxDepth: number;
+	readonly maxDepth?: number;
 }
 
 /**
