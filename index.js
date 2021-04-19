@@ -76,6 +76,7 @@ const destroyCircular = ({
 
 		if (!seen.includes(from[key])) {
 			depth++;
+
 			to[key] = destroyCircular({
 				from: from[key],
 				seen: seen.slice(),
