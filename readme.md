@@ -96,15 +96,17 @@ Type: `object`
 Type: `number`\
 Default: `Number.POSITIVE_INFINITY`
 
-Specifies the maximum depth of properties to copy when serializing/deserializing
+The maximum depth of properties to preserve when serializing/deserializing.
 
 ```js
+const {serializeError} = require('serialize-error');
+
 const error = new Error('🦄');
-error.one = {two: { three: {}}};
+error.one = {two: {three: {}}};
 
 console.log(serializeError(error, {maxDepth: 1}));
-//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …', one: {}}
+//=> {name: 'Error', message: '…', one: {}}
 
 console.log(serializeError(error, {maxDepth: 2}));
-//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …', one: { two: {}}}
+//=> {name: 'Error', message: '…', one: { two: {}}}
 ```
