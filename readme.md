@@ -48,30 +48,40 @@ Circular references are handled.
 If the input object has a `.toJSON()` method, then it's called instead of serializing the object's properties.
 It's up to `.toJSON()` implementation to handle circular references and enumerability of the properties.
 
-`.toJSON` example:
+`.toJSON` examples:
 
 ```js
+const {serializeError} = require('serialize-error');
+
 class ErrorWithDate extends Error {
-    constructor() {
-        super();
-        this.date = new Date();
-    }
+	constructor() {
+		super();
+		this.date = new Date();
+	}
 }
+
 const error = new ErrorWithDate();
-serializeError(date);
+
+serializeError(error);
 // => {date: '1970-01-01T00:00:00.000Z', name, message, stack}
+```
+
+```js
+const {serializeError} = require('serialize-error');
 
 class ErrorWithToJSON extends Error {
-    constructor() {
-        super('🦄');
-        this.date = new Date();
-    }
+	constructor() {
+		super('🦄');
+		this.date = new Date();
+	}
 
-    toJSON() {
-        return serializeError(this);
-    }
+	toJSON() {
+		return serializeError(this);
+	}
 }
+
 const error = new ErrorWithToJSON();
+
 console.log(serializeError(error));
 // => {date: '1970-01-01T00:00:00.000Z', message: '🦄', name, stack}
 ```
