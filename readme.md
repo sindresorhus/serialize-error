@@ -57,8 +57,8 @@ class ErrorWithDate extends Error {
         this.date = new Date();
     }
 }
-const error = new ErrorWithDate();
-serializeError(date);
+const errorWithDate = new ErrorWithDate();
+serializeError(errorWithDate);
 // => {date: '1970-01-01T00:00:00.000Z', name, message, stack}
 
 class ErrorWithToJSON extends Error {
