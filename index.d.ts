@@ -33,12 +33,12 @@ export interface Options {
 /**
 Serialize an `Error` object into a plain object.
 
-Non-error values are passed through.
-Custom properties are preserved.
-Buffer properties are replaced with `[object Buffer]`.
-Circular references are handled.
-If the input object has a `.toJSON()` method, then it's called instead of serializing the object's properties.
-It's up to `.toJSON()` implementation to handle circular references and enumerability of the properties.
+- Non-error values are passed through.
+- Custom properties are preserved.
+- Buffer properties are replaced with `[object Buffer]`.
+- Circular references are handled.
+- If the input object has a `.toJSON()` method, then it's called instead of serializing the object's properties.
+- It's up to `.toJSON()` implementation to handle circular references and enumerability of the properties.
 
 @example
 ```
@@ -98,12 +98,12 @@ export function serializeError<ErrorType>(error: ErrorType, options?: Options): 
 /**
 Deserialize a plain object or any value into an `Error` object.
 
-`Error` objects are passed through.
-Non-error values are wrapped in a `NonError` error.
-Custom properties are preserved.
-Non-enumerable properties are kept non-enumerable (name, message, stack).
-Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
-Circular references are handled.
+- `Error` objects are passed through.
+- Non-error values are wrapped in a `NonError` error.
+- Custom properties are preserved.
+- Non-enumerable properties are kept non-enumerable (name, message, stack).
+- Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
+- Circular references are handled.
 
 @example
 ```

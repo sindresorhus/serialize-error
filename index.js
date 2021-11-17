@@ -1,12 +1,11 @@
-'use strict';
-
-class NonError extends Error {
+export class NonError extends Error {
 	constructor(message) {
 		super(NonError._prepareSuperMessage(message));
+
 		Object.defineProperty(this, 'name', {
 			value: 'NonError',
 			configurable: true,
-			writable: true
+			writable: true,
 		});
 
 		if (Error.captureStackTrace) {
@@ -24,18 +23,30 @@ class NonError extends Error {
 }
 
 const commonProperties = [
-	{property: 'name', enumerable: false},
-	{property: 'message', enumerable: false},
-	{property: 'stack', enumerable: false},
-	{property: 'code', enumerable: true}
+	{
+		property: 'name',
+		enumerable: false,
+	},
+	{
+		property: 'message',
+		enumerable: false,
+	},
+	{
+		property: 'stack',
+		enumerable: false,
+	},
+	{
+		property: 'code',
+		enumerable: true,
+	},
 ];
 
-const isCalled = Symbol('.toJSON called');
+const toJsonWasCalled = Symbol('.toJSON was called');
 
 const toJSON = from => {
-	from[isCalled] = true;
+	from[toJsonWasCalled] = true;
 	const json = from.toJSON();
-	delete from[isCalled];
+	delete from[toJsonWasCalled];
 	return json;
 };
 
@@ -45,7 +56,7 @@ const destroyCircular = ({
 	to_,
 	forceEnumerable,
 	maxDepth,
-	depth
+	depth,
 }) => {
 	const to = to_ || (Array.isArray(from) ? [] : {});
 
@@ -55,11 +66,12 @@ const destroyCircular = ({
 		return to;
 	}
 
-	if (typeof from.toJSON === 'function' && from[isCalled] !== true) {
+	if (typeof from.toJSON === 'function' && from[toJsonWasCalled] !== true) {
 		return toJSON(from);
 	}
 
 	for (const [key, value] of Object.entries(from)) {
+		// eslint-disable-next-line node/prefer-global/buffer
 		if (typeof Buffer === 'function' && Buffer.isBuffer(value)) {
 			to[key] = '[object Buffer]';
 			continue;
@@ -79,10 +91,10 @@ const destroyCircular = ({
 
 			to[key] = destroyCircular({
 				from: from[key],
-				seen: seen.slice(),
+				seen: [...seen],
 				forceEnumerable,
 				maxDepth,
-				depth
+				depth,
 			});
 			continue;
 		}
@@ -96,7 +108,7 @@ const destroyCircular = ({
 				value: from[property],
 				enumerable: forceEnumerable ? true : enumerable,
 				configurable: true,
-				writable: true
+				writable: true,
 			});
 		}
 	}
@@ -104,7 +116,7 @@ const destroyCircular = ({
 	return to;
 };
 
-const serializeError = (value, options = {}) => {
+export function serializeError(value, options = {}) {
 	const {maxDepth = Number.POSITIVE_INFINITY} = options;
 
 	if (typeof value === 'object' && value !== null) {
@@ -113,7 +125,7 @@ const serializeError = (value, options = {}) => {
 			seen: [],
 			forceEnumerable: true,
 			maxDepth,
-			depth: 0
+			depth: 0,
 		});
 	}
 
@@ -124,9 +136,9 @@ const serializeError = (value, options = {}) => {
 	}
 
 	return value;
-};
+}
 
-const deserializeError = (value, options = {}) => {
+export function deserializeError(value, options = {}) {
 	const {maxDepth = Number.POSITIVE_INFINITY} = options;
 
 	if (value instanceof Error) {
@@ -140,15 +152,10 @@ const deserializeError = (value, options = {}) => {
 			seen: [],
 			to_: newError,
 			maxDepth,
-			depth: 0
+			depth: 0,
 		});
 		return newError;
 	}
 
 	return new NonError(value);
-};
-
-module.exports = {
-	serializeError,
-	deserializeError
-};
+}

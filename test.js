@@ -1,3 +1,4 @@
+import {Buffer} from 'node:buffer';
 import test from 'ava';
 import {serializeError, deserializeError} from './index.js';
 
@@ -108,7 +109,7 @@ test('should not access deep non-enumerable properties', t => {
 		enumerable: false,
 		get() {
 			throw new Error('some other error');
-		}
+		},
 	});
 	error.object = object;
 	t.notThrows(() => serializeError(error));
@@ -157,7 +158,7 @@ test('should deserialize error', t => {
 test('should deserialize and preserve existing properties', t => {
 	const deserialized = deserializeError({
 		message: 'foo',
-		customProperty: true
+		customProperty: true,
 	});
 	t.true(deserialized instanceof Error);
 	t.is(deserialized.message, 'foo');
@@ -169,7 +170,7 @@ test('should deserialize plain object', t => {
 		message: 'error message',
 		stack: 'at <anonymous>:1:13',
 		name: 'name',
-		code: 'code'
+		code: 'code',
 	};
 
 	const deserialized = deserializeError(object);
@@ -184,7 +185,7 @@ test('deserialized name, stack and message should not be enumerable, other props
 	const object = {
 		message: 'error message',
 		stack: 'at <anonymous>:1:13',
-		name: 'name'
+		name: 'name',
 	};
 	const nonEnumerableProps = Object.keys(object);
 
@@ -193,7 +194,7 @@ test('deserialized name, stack and message should not be enumerable, other props
 		path: './path',
 		errno: 1,
 		syscall: 'syscall',
-		randomProperty: 'random'
+		randomProperty: 'random',
 	};
 	const enumerableProps = Object.keys(enumerables);
 
@@ -217,9 +218,9 @@ test('should deserialize properties up to `Options.maxDepth` levels deep', t => 
 		stack: error.stack,
 		one: {
 			two: {
-				three: {}
-			}
-		}
+				three: {},
+			},
+		},
 	};
 
 	const levelZero = deserializeError(object, {maxDepth: 0});
@@ -261,7 +262,7 @@ test('should serialize custom error with `.toJSON`', t => {
 		toJSON() {
 			return {
 				message: this.message,
-				amount: `$${this.value}`
+				amount: `$${this.value}`,
 			};
 		}
 	}
@@ -269,7 +270,7 @@ test('should serialize custom error with `.toJSON`', t => {
 	const serialized = serializeError(error);
 	t.deepEqual(serialized, {
 		message: 'foo',
-		amount: '$10'
+		amount: '$10',
 	});
 	t.true(serialized.stack === undefined);
 });
@@ -286,9 +287,9 @@ test('should serialize custom error with a property having `.toJSON`', t => {
 		amount: 20,
 		toJSON() {
 			return {
-				amount: `$${this.amount}`
+				amount: `$${this.amount}`,
 			};
-		}
+		},
 	};
 	const error = new CustomError(value);
 	const serialized = serializeError(error);
@@ -297,8 +298,8 @@ test('should serialize custom error with a property having `.toJSON`', t => {
 		message: 'foo',
 		name: 'CustomError',
 		value: {
-			amount: '$20'
-		}
+			amount: '$20',
+		},
 	});
 	t.not(stack, undefined);
 });
@@ -321,7 +322,7 @@ test('should serialize custom error with `.toJSON` defined with `serializeError`
 	t.deepEqual(rest, {
 		message: 'foo',
 		name: 'CustomError',
-		value: 30
+		value: 30,
 	});
 	t.not(stack, undefined);
 });

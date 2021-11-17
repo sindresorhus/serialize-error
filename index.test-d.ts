@@ -11,5 +11,5 @@ expectType<Error>(deserializeError({
 	message: 'error message',
 	stack: 'at <anonymous>:1:13',
 	name: 'name',
-	code: 'code'
+	code: 'code',
 }));
