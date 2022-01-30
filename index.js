@@ -77,6 +77,11 @@ const destroyCircular = ({
 			continue;
 		}
 
+		if (typeof value === 'object' && typeof value._read === 'function' && typeof value._readableState === 'object') {
+			to[key] = '[object Readable]';
+			continue;
+		}
+
 		if (typeof value === 'function') {
 			continue;
 		}
