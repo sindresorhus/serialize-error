@@ -77,6 +77,7 @@ const destroyCircular = ({
 			continue;
 		}
 
+		// TODO: Use `stream.isReadable()` when targeting Node.js 18.
 		if (typeof value === 'object' && typeof value._read === 'function' && typeof value._readableState === 'object') {
 			to[key] = '[object Readable]';
 			continue;
