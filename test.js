@@ -1,4 +1,5 @@
 import {Buffer} from 'node:buffer';
+import Stream from 'node:stream';
 import test from 'ava';
 import {serializeError, deserializeError} from './index.js';
 
@@ -80,6 +81,15 @@ test('should discard buffers', t => {
 	const object = {a: Buffer.alloc(1)};
 	const serialized = serializeError(object);
 	t.deepEqual(serialized, {a: '[object Buffer]'});
+});
+
+test('should discard streams', t => {
+	t.deepEqual(serializeError({s: new Stream.Stream()}), {s: '[object Stream]'}, 'Stream.Stream');
+	t.deepEqual(serializeError({s: new Stream.Readable()}), {s: '[object Stream]'}, 'Stream.Readable');
+	t.deepEqual(serializeError({s: new Stream.Writable()}), {s: '[object Stream]'}, 'Stream.Writable');
+	t.deepEqual(serializeError({s: new Stream.Duplex()}), {s: '[object Stream]'}, 'Stream.Duplex');
+	t.deepEqual(serializeError({s: new Stream.Transform()}), {s: '[object Stream]'}, 'Stream.Transform');
+	t.deepEqual(serializeError({s: new Stream.PassThrough()}), {s: '[object Stream]'}, 'Stream.PassThrough');
 });
 
 test('should replace top-level functions with a helpful string', t => {
