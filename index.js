@@ -1,12 +1,8 @@
 export class NonError extends Error {
+	name = 'NonError';
+
 	constructor(message) {
 		super(NonError._prepareSuperMessage(message));
-
-		Object.defineProperty(this, 'name', {
-			value: 'NonError',
-			configurable: true,
-			writable: true,
-		});
 
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, NonError);
