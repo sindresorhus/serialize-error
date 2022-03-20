@@ -3,11 +3,7 @@ export class NonError extends Error {
 
 	constructor(message) {
 		super(NonError._prepareSuperMessage(message));
-
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, NonError);
-		}
-	}
+  }
 
 	static _prepareSuperMessage(message) {
 		try {
