@@ -3,7 +3,7 @@ export class NonError extends Error {
 
 	constructor(message) {
 		super(NonError._prepareSuperMessage(message));
-  }
+	}
 
 	static _prepareSuperMessage(message) {
 		try {
