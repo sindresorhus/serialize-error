@@ -30,6 +30,7 @@
 		"convert",
 		"process",
 		"send",
+		"cause",
 		"deserialize"
 	],
 	"dependencies": {

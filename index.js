@@ -31,6 +31,10 @@ const commonProperties = [
 		property: 'code',
 		enumerable: true,
 	},
+	{
+		property: 'cause',
+		enumerable: false,
+	},
 ];
 
 const toJsonWasCalled = Symbol('.toJSON was called');
@@ -101,7 +105,7 @@ const destroyCircular = ({
 	}
 
 	for (const {property, enumerable} of commonProperties) {
-		if (typeof from[property] === 'string') {
+		if (typeof from[property] !== 'undefined' && from[property] !== null) {
 			Object.defineProperty(to, property, {
 				value: from[property],
 				enumerable: forceEnumerable ? true : enumerable,
