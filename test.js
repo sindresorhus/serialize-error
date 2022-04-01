@@ -134,6 +134,15 @@ test('should serialize nested errors', t => {
 	t.is(serialized.innerError.message, 'inner error');
 });
 
+test('should serialize the cause property', t => {
+	const error = new Error('outer error');
+	error.cause = new Error('inner error');
+
+	const serialized = serializeError(error);
+	t.is(serialized.message, 'outer error');
+	t.is(serialized.cause.message, 'inner error');
+});
+
 test('should handle top-level null values', t => {
 	const serialized = serializeError(null);
 	t.is(serialized, null);
@@ -191,13 +200,38 @@ test('should deserialize plain object', t => {
 	t.is(deserialized.code, 'code');
 });
 
-test('deserialized name, stack and message should not be enumerable, other props should be', t => {
+test('should deserialize the cause property', t => {
 	const object = {
 		message: 'error message',
 		stack: 'at <anonymous>:1:13',
 		name: 'name',
+		code: 'code',
+		cause: {
+			message: 'source error message',
+			stack: 'at <anonymous>:3:14',
+			name: 'name',
+			code: 'code',
+		},
 	};
-	const nonEnumerableProps = Object.keys(object);
+
+	const {cause} = deserializeError(object);
+	t.is(cause.message, 'source error message');
+	t.is(cause.stack, 'at <anonymous>:3:14');
+	t.is(cause.name, 'name');
+	t.is(cause.code, 'code');
+});
+
+test('deserialized name, stack, cause an message should not be enumerable, other props should be', t => {
+	const object = {
+		message: 'error message',
+		stack: 'at <anonymous>:1:13',
+		name: 'name',
+		cause: {
+			message: 'cause error message',
+			stack: 'at <anonymous>:4:20',
+			name: 'name',
+		},
+	};
 
 	const enumerables = {
 		code: 'code',
@@ -206,18 +240,13 @@ test('deserialized name, stack and message should not be enumerable, other props
 		syscall: 'syscall',
 		randomProperty: 'random',
 	};
-	const enumerableProps = Object.keys(enumerables);
 
 	const deserialized = deserializeError({...object, ...enumerables});
-	const deserializedEnumerableProps = Object.keys(deserialized);
 
-	for (const prop of nonEnumerableProps) {
-		t.false(deserializedEnumerableProps.includes(prop));
-	}
-
-	for (const prop of enumerableProps) {
-		t.true(deserializedEnumerableProps.includes(prop));
-	}
+	t.deepEqual(
+		Object.keys(enumerables),
+		Object.keys(deserialized),
+	);
 });
 
 test('should deserialize properties up to `Options.maxDepth` levels deep', t => {
