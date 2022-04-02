@@ -385,12 +385,24 @@ test('should serialize properties up to `Options.maxDepth` levels deep', t => {
 });
 
 test('should identify serialized errors', t => {
-	t.true(isErrorLike(serializeError(new Error('I\'m missing more than just your body'))));
+	t.true(isErrorLike(serializeError(new Error('I’m missing more than just your body'))));
 	// eslint-disable-next-line unicorn/error-message -- Testing this eventuality
 	t.true(isErrorLike(serializeError(new Error())));
 	t.true(isErrorLike({
 		name: 'Error',
 		message: 'Is it too late now to say sorry',
 		stack: 'at <anonymous>:3:14',
+	}));
+
+	t.false(isErrorLike({
+		name: 'Bluberricious pancakes',
+		stack: 12,
+		ingredients: 'Blueberry',
+	}));
+
+	t.false(isErrorLike({
+		name: 'Edwin Monton',
+		message: 'I’ve been trying to contact you about extended warranty',
+		medium: 'Glass bottle in ocean',
 	}));
 });
