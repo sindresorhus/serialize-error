@@ -131,6 +131,7 @@ export function deserializeError(errorObject: ErrorObject | unknown, options?: O
 /**
 Predicate to determine whether a value looks like an error, even if it's not an instance of `Error`. It must have at least the `name`, `message`, and `stack` properties.
 
+@example
 ```js
 import {isErrorLike} from 'serialize-error';
 
