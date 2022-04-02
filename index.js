@@ -56,6 +56,7 @@ const destroyCircular = ({
 }) => {
 	const to = to_ || (Array.isArray(from) ? [] : {});
 
+	console.log({to});
 	seen.push(from);
 
 	if (depth >= maxDepth) {
@@ -65,6 +66,16 @@ const destroyCircular = ({
 	if (typeof from.toJSON === 'function' && from[toJsonWasCalled] !== true) {
 		return toJSON(from);
 	}
+
+	const destroyLocal = value => destroyCircular({
+		from: value,
+		seen: [...seen],
+		// eslint-disable-next-line unicorn/error-message
+		to_: isErrorLike(value) ? new Error() : undefined,
+		forceEnumerable,
+		maxDepth,
+		depth,
+	});
 
 	for (const [key, value] of Object.entries(from)) {
 		// eslint-disable-next-line node/prefer-global/buffer
@@ -90,14 +101,8 @@ const destroyCircular = ({
 
 		if (!seen.includes(from[key])) {
 			depth++;
+			to[key] = destroyLocal(from[key]);
 
-			to[key] = destroyCircular({
-				from: from[key],
-				seen: [...seen],
-				forceEnumerable,
-				maxDepth,
-				depth,
-			});
 			continue;
 		}
 
@@ -107,7 +112,7 @@ const destroyCircular = ({
 	for (const {property, enumerable} of commonProperties) {
 		if (typeof from[property] !== 'undefined' && from[property] !== null) {
 			Object.defineProperty(to, property, {
-				value: from[property],
+				value: isErrorLike(from[property]) ? destroyLocal(from[property]) : from[property],
 				enumerable: forceEnumerable ? true : enumerable,
 				configurable: true,
 				writable: true,
@@ -148,15 +153,14 @@ export function deserializeError(value, options = {}) {
 	}
 
 	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-		const newError = new Error(); // eslint-disable-line unicorn/error-message
-		destroyCircular({
+		return destroyCircular({
 			from: value,
 			seen: [],
-			to_: newError,
+			// eslint-disable-next-line unicorn/error-message
+			to_: new Error(),
 			maxDepth,
 			depth: 0,
 		});
-		return newError;
 	}
 
 	return new NonError(value);
