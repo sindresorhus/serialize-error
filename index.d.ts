@@ -28,6 +28,36 @@ export interface Options {
 	```
 	*/
 	readonly maxDepth?: number;
+
+	/**
+	Indicate whether to use a `toJSON` method if encountered in the object.
+
+	@default true
+
+	@example
+	```js
+	import {serializeError} from 'serialize-error';
+
+	class UnserializableError extends Error {
+		name = 'UnserializableError';
+
+		toJSON() {
+			// Break serialization
+			return {};
+		}
+	}
+
+	const error = new UnserializableError('🦄');
+
+	console.log(serializeError(error));
+	//=> {}
+
+	console.log(serializeError(error, {useToJSON: false}));
+	//=> {name: 'UnserializableError', message: '🦄', stack: 'etc'}
+	```
+
+	*/
+	readonly useToJSON?: boolean;
 }
 
 /**

@@ -117,8 +117,36 @@ const error = new Error('🦄');
 error.one = {two: {three: {}}};
 
 console.log(serializeError(error, {maxDepth: 1}));
-//=> {name: 'Error', message: '…', one: {}}
+//=> {name: 'Error', message: '🦄', one: {}}
 
 console.log(serializeError(error, {maxDepth: 2}));
-//=> {name: 'Error', message: '…', one: { two: {}}}
+//=> {name: 'Error', message: '🦄', one: { two: {}}}
+```
+
+#### useToJSON
+
+Type: `boolean`\
+Default: `true`
+
+Indicate whether to use a `toJSON` method if encountered in the object.
+
+```js
+import {serializeError} from 'serialize-error';
+
+class UnserializableError extends Error {
+	name = 'UnserializableError';
+
+	toJSON() {
+		// Break serialization
+		return {};
+	}
+}
+
+const error = new UnserializableError('🦄');
+
+console.log(serializeError(error));
+//=> {}
+
+console.log(serializeError(error, {useToJSON: false}));
+//=> {name: 'UnserializableError', message: '🦄', stack: 'etc'}
 ```
