@@ -56,7 +56,6 @@ const destroyCircular = ({
 }) => {
 	const to = to_ || (Array.isArray(from) ? [] : {});
 
-	console.log({to});
 	seen.push(from);
 
 	if (depth >= maxDepth) {
