@@ -1,8 +1,8 @@
 import {Buffer} from 'node:buffer';
 import Stream from 'node:stream';
 import test from 'ava';
-import {serializeError, deserializeError, isErrorLike} from './index.js';
 import errorConstructors from './error-constructors.js';
+import {serializeError, deserializeError, isErrorLike} from './index.js';
 
 function deserializeNonError(t, value) {
 	const deserialized = deserializeError(value);
