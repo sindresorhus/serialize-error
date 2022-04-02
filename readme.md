@@ -20,7 +20,7 @@ const error = new Error('🦄');
 console.log(error);
 //=> [Error: 🦄]
 
-const serialized = serializeError(error)
+const serialized = serializeError(error);
 
 console.log(serialized);
 //=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …'}
@@ -137,19 +137,19 @@ isErrorLike({
 	name: "DOMException",
 	message: "It happened",
 	stack: "at foo (index.js:2:9)",
-})
+});
 //=> true
 
-isErrorLike(new Error('🦄'))
+isErrorLike(new Error('🦄'));
 //=> true
 
-isErrorLike(serializeError(new Error('🦄'))
+isErrorLike(serializeError(new Error('🦄'));
 //=> true
 
 isErrorLike({
 	name: 'Bluberricious pancakes',
 	stack: 12,
 	ingredients: 'Blueberry',
-})
+});
 //=> false
 ```
