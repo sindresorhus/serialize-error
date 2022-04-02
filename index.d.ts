@@ -130,5 +130,33 @@ export function deserializeError(errorObject: ErrorObject | unknown, options?: O
 
 /**
 Predicate to determine whether a value looks like an error, even if it's not an instance of `Error`. It must have at least the `name`, `message`, and `stack` properties.
+
+```js
+import {isErrorLike} from 'serialize-error';
+
+const error = new Error('🦄');
+error.one = {two: {three: {}}};
+
+isErrorLike({
+	name: 'DOMException',
+	message: 'It happened',
+	stack: 'at foo (index.js:2:9)',
+});
+//=> true
+
+isErrorLike(new Error('🦄'));
+//=> true
+
+isErrorLike(serializeError(new Error('🦄'));
+//=> true
+
+isErrorLike({
+	name: 'Bluberricious pancakes',
+	stack: 12,
+	ingredients: 'Blueberry',
+});
+//=> false
+```
+
 */
 export function isErrorLike(value: unknown): value is ErrorLike;

@@ -134,9 +134,9 @@ const error = new Error('🦄');
 error.one = {two: {three: {}}};
 
 isErrorLike({
-	name: "DOMException",
-	message: "It happened",
-	stack: "at foo (index.js:2:9)",
+	name: 'DOMException',
+	message: 'It happened',
+	stack: 'at foo (index.js:2:9)',
 });
 //=> true
 
