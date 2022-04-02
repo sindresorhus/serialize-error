@@ -162,7 +162,7 @@ export function deserializeError(value, options = {}) {
 	return new NonError(value);
 }
 
-export function isSerializedError(error) {
+export function isErrorLike(error) {
 	return error
 	&& typeof error === 'object'
 	&& 'name' in error

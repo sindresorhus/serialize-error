@@ -1,7 +1,7 @@
 import {Buffer} from 'node:buffer';
 import Stream from 'node:stream';
 import test from 'ava';
-import {serializeError, deserializeError, isSerializedError} from './index.js';
+import {serializeError, deserializeError, isErrorLike} from './index.js';
 
 function deserializeNonError(t, value) {
 	const deserialized = deserializeError(value);
@@ -385,10 +385,10 @@ test('should serialize properties up to `Options.maxDepth` levels deep', t => {
 });
 
 test('should identify serialized errors', t => {
-	t.true(isSerializedError(serializeError(new Error('I\'m missing more than just your body'))));
+	t.true(isErrorLike(serializeError(new Error('I\'m missing more than just your body'))));
 	// eslint-disable-next-line unicorn/error-message -- Testing this eventuality
-	t.true(isSerializedError(serializeError(new Error())));
-	t.true(isSerializedError({
+	t.true(isErrorLike(serializeError(new Error())));
+	t.true(isErrorLike({
 		name: 'Error',
 		message: 'Is it too late now to say sorry',
 		stack: 'at <anonymous>:3:14',

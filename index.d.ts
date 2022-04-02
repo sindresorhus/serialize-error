@@ -124,4 +124,4 @@ export function deserializeError(errorObject: ErrorObject | unknown, options?: O
 /**
 Predicate to determine whether an object looks like an error, even if it's not an instance of Error
 */
-export function isSerializedError(error: unknown): error is ErrorObject;
+export function isErrorLike(error: unknown): error is ErrorObject;
