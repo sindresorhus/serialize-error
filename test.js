@@ -2,6 +2,7 @@ import {Buffer} from 'node:buffer';
 import Stream from 'node:stream';
 import test from 'ava';
 import {serializeError, deserializeError, isErrorLike} from './index.js';
+import errorConstructors from './error-constructors.js';
 
 function deserializeNonError(t, value) {
 	const deserialized = deserializeError(value);
@@ -183,6 +184,17 @@ test('should deserialize and preserve existing properties', t => {
 	t.is(deserialized.message, 'foo');
 	t.true(deserialized.customProperty);
 });
+
+for (const [name, CustomError] of errorConstructors) {
+	test(`should deserialize and preserve the ${name} constructor`, t => {
+		const deserialized = deserializeError({
+			name,
+			message: 'foo',
+		});
+		t.true(deserialized instanceof CustomError);
+		t.is(deserialized.message, 'foo');
+	});
+}
 
 test('should deserialize plain object', t => {
 	const object = {
