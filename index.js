@@ -48,7 +48,7 @@ const toJSON = from => {
 	return json;
 };
 
-const getErrorConstructor = name => nativeErrorConstructors.get(name) ?? Error;
+const getErrorConstructor = name => nativeErrorConstructors.get(name) || Error;
 
 const destroyCircular = ({
 	from,
