@@ -366,6 +366,31 @@ test('should serialize custom error with `.toJSON` defined with `serializeError`
 	t.not(stack, undefined);
 });
 
+test('should ignore `.toJSON` methods if set in the options', t => {
+	class CustomError extends Error {
+		constructor() {
+			super('foo');
+			this.name = this.constructor.name;
+			this.value = 10;
+		}
+
+		toJSON() {
+			return {
+				message: this.message,
+				amount: `$${this.value}`,
+			};
+		}
+	}
+	const error = new CustomError();
+	const serialized = serializeError(error, {toJSON: false});
+	t.like(serialized, {
+		name: 'CustomError',
+		message: 'foo',
+		value: 10,
+	});
+	t.truthy(serialized.stack);
+});
+
 test('should serialize properties up to `Options.maxDepth` levels deep', t => {
 	const error = new Error('errorMessage');
 	error.one = {two: {three: {}}};
