@@ -200,49 +200,30 @@ test('should deserialize plain object', t => {
 	t.is(deserialized.code, 'code');
 });
 
-test('should deserialize nested errors', t => {
-	const object = {
-		message: 'error message',
-		stack: 'at <anonymous>:1:13',
-		name: 'name',
-		code: 'code',
-		innerError: {
-			message: 'source error message',
-			stack: 'at <anonymous>:3:14',
+for (const property of ['cause', 'any']) {
+	// `cause` is treated differently from other properties in the code
+	test(`should deserialize errors on ${property} property`, t => {
+		const object = {
+			message: 'error message',
+			stack: 'at <anonymous>:1:13',
 			name: 'name',
 			code: 'code',
-		},
-	};
+			[property]: {
+				message: 'source error message',
+				stack: 'at <anonymous>:3:14',
+				name: 'name',
+				code: 'code',
+			},
+		};
 
-	const {innerError} = deserializeError(object);
-	t.true(innerError instanceof Error);
-	t.is(innerError.message, 'source error message');
-	t.is(innerError.stack, 'at <anonymous>:3:14');
-	t.is(innerError.name, 'name');
-	t.is(innerError.code, 'code');
-});
-
-test('should deserialize the cause property', t => {
-	const object = {
-		message: 'error message',
-		stack: 'at <anonymous>:1:13',
-		name: 'name',
-		code: 'code',
-		cause: {
-			message: 'source error message',
-			stack: 'at <anonymous>:3:14',
-			name: 'name',
-			code: 'code',
-		},
-	};
-
-	const {cause} = deserializeError(object);
-	t.true(cause instanceof Error);
-	t.is(cause.message, 'source error message');
-	t.is(cause.stack, 'at <anonymous>:3:14');
-	t.is(cause.name, 'name');
-	t.is(cause.code, 'code');
-});
+		const {[property]: nested} = deserializeError(object);
+		t.true(nested instanceof Error);
+		t.is(nested.message, 'source error message');
+		t.is(nested.stack, 'at <anonymous>:3:14');
+		t.is(nested.name, 'name');
+		t.is(nested.code, 'code');
+	});
+}
 
 test('deserialized name, stack, cause an message should not be enumerable, other props should be', t => {
 	const object = {
