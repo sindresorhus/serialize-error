@@ -162,10 +162,10 @@ export function deserializeError(value, options = {}) {
 	return new NonError(value);
 }
 
-export function isErrorLike(error) {
-	return error
-	&& typeof error === 'object'
-	&& 'name' in error
-	&& 'message' in error
-	&& 'stack' in error;
+export function isErrorLike(value) {
+	return value
+	&& typeof value === 'object'
+	&& 'name' in value
+	&& 'message' in value
+	&& 'stack' in value;
 }

@@ -122,6 +122,6 @@ console.log(error);
 export function deserializeError(errorObject: ErrorObject | unknown, options?: Options): Error;
 
 /**
-Predicate to determine whether an object looks like an error, even if it's not an instance of Error
+Predicate to determine whether a value looks like an error, even if it's not an instance of `Error`. It must have at least the `name`, `message`, and `stack` properties.
 */
-export function isErrorLike(error: unknown): error is ErrorObject;
+export function isErrorLike(value: unknown): value is ErrorObject;
