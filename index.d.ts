@@ -7,6 +7,13 @@ export type ErrorObject = {
 	code?: string;
 } & JsonObject;
 
+export type ErrorLike = {
+	name: string;
+	stack: string;
+	message: string;
+	code?: string;
+} & JsonObject;
+
 export interface Options {
 	/**
 	The maximum depth of properties to preserve when serializing/deserializing.
