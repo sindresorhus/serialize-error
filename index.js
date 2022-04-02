@@ -161,3 +161,11 @@ export function deserializeError(value, options = {}) {
 
 	return new NonError(value);
 }
+
+export function isSerializedError(error) {
+	return error
+	&& typeof error === 'object'
+	&& 'name' in error
+	&& 'message' in error
+	&& 'stack' in error;
+}

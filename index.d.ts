@@ -120,3 +120,8 @@ console.log(error);
 ```
 */
 export function deserializeError(errorObject: ErrorObject | unknown, options?: Options): Error;
+
+/**
+Predicate to determine whether an object looks like an error, even if it's not an instance of Error
+*/
+export function isSerializedError(error: unknown): error is ErrorObject;
