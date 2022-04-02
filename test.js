@@ -402,7 +402,7 @@ test('should identify serialized errors', t => {
 
 	t.false(isErrorLike({
 		name: 'Edwin Monton',
-		message: 'I’ve been trying to contact you about extended warranty',
+		message: 'We’ve been trying to reach you about your car’s extended warranty',
 		medium: 'Glass bottle in ocean',
 	}));
 });
