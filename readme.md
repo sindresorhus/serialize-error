@@ -69,21 +69,16 @@ serializeError(error);
 ```js
 import {serializeError} from 'serialize-error';
 
-class ErrorWithToJSON extends Error {
-	constructor() {
-		super('🦄');
-		this.date = new Date();
-	}
+const error = new Error('Unicorn');
 
+error.horn = {
 	toJSON() {
-		return serializeError(this);
+		return 'x';
 	}
-}
+};
 
-const error = new ErrorWithToJSON();
-
-console.log(serializeError(error));
-// => {date: '1970-01-01T00:00:00.000Z', message: '🦄', name, stack}
+serializeError(error);
+// => {horn: 'x', name, message, stack}
 ```
 
 ### deserializeError(value, options?)
