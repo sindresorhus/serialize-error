@@ -2,19 +2,19 @@ import {Primitive, JsonObject} from 'type-fest';
 
 export type ErrorObject = {
 	name?: string;
-	stack?: string;
 	message?: string;
-	code?: string;
+	stack?: string;
 	cause?: unknown;
+	code?: string;
 } & JsonObject;
 
 export type ErrorLike = {
 	[key: string]: unknown;
 	name: string;
-	stack: string;
 	message: string;
-	code?: string;
+	stack: string;
 	cause?: unknown;
+	code?: string;
 };
 
 export interface Options {
@@ -156,6 +156,5 @@ isErrorLike({
 });
 //=> false
 ```
-
 */
 export function isErrorLike(value: unknown): value is ErrorLike;
