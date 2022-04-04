@@ -2,10 +2,20 @@ import {Primitive, JsonObject} from 'type-fest';
 
 export type ErrorObject = {
 	name?: string;
-	stack?: string;
 	message?: string;
+	stack?: string;
+	cause?: unknown;
 	code?: string;
 } & JsonObject;
+
+export type ErrorLike = {
+	[key: string]: unknown;
+	name: string;
+	message: string;
+	stack: string;
+	cause?: unknown;
+	code?: string;
+};
 
 export interface Options {
 	/**
@@ -82,21 +92,16 @@ console.log(serializeError(error));
 ```
 import {serializeError} from 'serialize-error';
 
-class ErrorWithToJSON extends Error {
-	constructor() {
-		super('🦄');
-		this.date = new Date();
-	}
+const error = new Error('Unicorn');
 
+error.horn = {
 	toJSON() {
-		return serializeError(this);
+		return 'x';
 	}
-}
+};
 
-const error = new ErrorWithToJSON();
-
-console.log(serializeError(error));
-// => {date: '1970-01-01T00:00:00.000Z', message: '🦄', name, stack}
+serializeError(error);
+// => {horn: 'x', name, message, stack}
 ```
 */
 export function serializeError<ErrorType>(error: ErrorType, options?: Options): ErrorType extends Primitive
@@ -128,3 +133,36 @@ console.log(error);
 ```
 */
 export function deserializeError(errorObject: ErrorObject | unknown, options?: Options): Error;
+
+/**
+Predicate to determine whether a value looks like an error, even if it's not an instance of `Error`. It must have at least the `name`, `message`, and `stack` properties.
+
+@example
+```
+import {isErrorLike} from 'serialize-error';
+
+const error = new Error('🦄');
+error.one = {two: {three: {}}};
+
+isErrorLike({
+	name: 'DOMException',
+	message: 'It happened',
+	stack: 'at foo (index.js:2:9)',
+});
+//=> true
+
+isErrorLike(new Error('🦄'));
+//=> true
+
+isErrorLike(serializeError(new Error('🦄'));
+//=> true
+
+isErrorLike({
+	name: 'Bluberricious pancakes',
+	stack: 12,
+	ingredients: 'Blueberry',
+});
+//=> false
+```
+*/
+export function isErrorLike(value: unknown): value is ErrorLike;
