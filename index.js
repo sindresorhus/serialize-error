@@ -145,7 +145,7 @@ export function serializeError(value, options = {}) {
 	// People sometimes throw things besides Error objects…
 	if (typeof value === 'function') {
 		// `JSON.stringify()` discards functions. We do too, unless a function is thrown directly.
-		return `[Function: ${(value.name || 'anonymous')}]`;
+		return `[Function: ${value.name || 'anonymous'}]`;
 	}
 
 	return value;
