@@ -40,10 +40,9 @@ export interface Options {
 	readonly maxDepth?: number;
 
 	/**
-	Indicate whether to use a `.toJSON()` method if encountered in the object. This is useful when a custom error implements its own serialization logic via `.toJSON()` but you prefer not using it.
+	Indicate whether to use a `.toJSON()` method if encountered in the object. This is useful when a custom error implements its own serialization logic via `.toJSON()` but you prefer to not use it.
 
 	@default true
-
 	*/
 	readonly useToJSON?: boolean;
 }

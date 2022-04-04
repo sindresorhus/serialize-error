@@ -305,6 +305,7 @@ test('should serialize custom error with `.toJSON`', t => {
 			};
 		}
 	}
+
 	const error = new CustomError();
 	const serialized = serializeError(error);
 	t.deepEqual(serialized, {
@@ -381,6 +382,7 @@ test('should ignore `.toJSON` methods if set in the options', t => {
 			};
 		}
 	}
+
 	const error = new CustomError();
 	const serialized = serializeError(error, {useToJSON: false});
 	t.like(serialized, {
