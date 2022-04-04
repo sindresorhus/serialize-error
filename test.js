@@ -382,7 +382,7 @@ test('should ignore `.toJSON` methods if set in the options', t => {
 		}
 	}
 	const error = new CustomError();
-	const serialized = serializeError(error, {toJSON: false});
+	const serialized = serializeError(error, {useToJSON: false});
 	t.like(serialized, {
 		name: 'CustomError',
 		message: 'foo',

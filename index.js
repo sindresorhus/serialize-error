@@ -124,7 +124,7 @@ const destroyCircular = ({
 export function serializeError(value, options = {}) {
 	const {
 		maxDepth = Number.POSITIVE_INFINITY,
-		toJSON: useToJSON = true,
+		useToJSON = true,
 	} = options;
 
 	if (typeof value === 'object' && value !== null) {

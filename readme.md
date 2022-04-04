@@ -128,25 +128,4 @@ console.log(serializeError(error, {maxDepth: 2}));
 Type: `boolean`\
 Default: `true`
 
-Indicate whether to use a `toJSON` method if encountered in the object.
-
-```js
-import {serializeError} from 'serialize-error';
-
-class UnserializableError extends Error {
-	name = 'UnserializableError';
-
-	toJSON() {
-		// Break serialization
-		return {};
-	}
-}
-
-const error = new UnserializableError('🦄');
-
-console.log(serializeError(error));
-//=> {}
-
-console.log(serializeError(error, {useToJSON: false}));
-//=> {name: 'UnserializableError', message: '🦄', stack: 'etc'}
-```
+Indicate whether to use a `.toJSON()` method if encountered in the object. This is useful when a custom error implements [its own serialization logic via `.toJSON()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior) but you prefer not using it.
