@@ -5,14 +5,17 @@ export type ErrorObject = {
 	stack?: string;
 	message?: string;
 	code?: string;
+	cause?: unknown;
 } & JsonObject;
 
 export type ErrorLike = {
+	[key: string]: unknown;
 	name: string;
 	stack: string;
 	message: string;
 	code?: string;
-} & JsonObject;
+	cause?: unknown;
+};
 
 export interface Options {
 	/**
