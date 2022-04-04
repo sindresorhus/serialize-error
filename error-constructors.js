@@ -7,7 +7,7 @@ const list = [
 	TypeError,
 	URIError,
 
-	// Browser-specific errors
+	// Built-in errors
 	globalThis.DOMException,
 
 	// Node-specific errors
