@@ -50,6 +50,7 @@ const toJSON = from => {
 
 const getErrorConstructor = name => nativeErrorConstructors.get(name) || Error;
 
+// eslint-disable-next-line complexity
 const destroyCircular = ({
 	from,
 	seen,
@@ -57,6 +58,7 @@ const destroyCircular = ({
 	forceEnumerable,
 	maxDepth,
 	depth,
+	useToJSON,
 }) => {
 	const to = to_ || (Array.isArray(from) ? [] : {});
 
@@ -66,7 +68,7 @@ const destroyCircular = ({
 		return to;
 	}
 
-	if (typeof from.toJSON === 'function' && from[toJsonWasCalled] !== true) {
+	if (useToJSON && typeof from.toJSON === 'function' && from[toJsonWasCalled] !== true) {
 		return toJSON(from);
 	}
 
@@ -80,6 +82,7 @@ const destroyCircular = ({
 			forceEnumerable,
 			maxDepth,
 			depth,
+			useToJSON,
 		});
 	};
 
@@ -130,7 +133,10 @@ const destroyCircular = ({
 };
 
 export function serializeError(value, options = {}) {
-	const {maxDepth = Number.POSITIVE_INFINITY} = options;
+	const {
+		maxDepth = Number.POSITIVE_INFINITY,
+		useToJSON = true,
+	} = options;
 
 	if (typeof value === 'object' && value !== null) {
 		return destroyCircular({
@@ -139,6 +145,7 @@ export function serializeError(value, options = {}) {
 			forceEnumerable: true,
 			maxDepth,
 			depth: 0,
+			useToJSON,
 		});
 	}
 

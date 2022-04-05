@@ -112,11 +112,18 @@ const error = new Error('🦄');
 error.one = {two: {three: {}}};
 
 console.log(serializeError(error, {maxDepth: 1}));
-//=> {name: 'Error', message: '…', one: {}}
+//=> {name: 'Error', message: '🦄', one: {}}
 
 console.log(serializeError(error, {maxDepth: 2}));
-//=> {name: 'Error', message: '…', one: { two: {}}}
+//=> {name: 'Error', message: '🦄', one: { two: {}}}
 ```
+
+#### useToJSON
+
+Type: `boolean`\
+Default: `true`
+
+Indicate whether to use a `.toJSON()` method if encountered in the object. This is useful when a custom error implements [its own serialization logic via `.toJSON()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior) but you prefer to not use it.
 
 ### isErrorLike(value)
 

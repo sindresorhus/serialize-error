@@ -212,49 +212,30 @@ test('should deserialize plain object', t => {
 	t.is(deserialized.code, 'code');
 });
 
-test('should deserialize nested errors', t => {
-	const object = {
-		message: 'error message',
-		stack: 'at <anonymous>:1:13',
-		name: 'name',
-		code: 'code',
-		innerError: {
-			message: 'source error message',
-			stack: 'at <anonymous>:3:14',
+for (const property of ['cause', 'any']) {
+	// `cause` is treated differently from other properties in the code
+	test(`should deserialize errors on ${property} property`, t => {
+		const object = {
+			message: 'error message',
+			stack: 'at <anonymous>:1:13',
 			name: 'name',
 			code: 'code',
-		},
-	};
+			[property]: {
+				message: 'source error message',
+				stack: 'at <anonymous>:3:14',
+				name: 'name',
+				code: 'code',
+			},
+		};
 
-	const {innerError} = deserializeError(object);
-	t.true(innerError instanceof Error);
-	t.is(innerError.message, 'source error message');
-	t.is(innerError.stack, 'at <anonymous>:3:14');
-	t.is(innerError.name, 'name');
-	t.is(innerError.code, 'code');
-});
-
-test('should deserialize the cause property', t => {
-	const object = {
-		message: 'error message',
-		stack: 'at <anonymous>:1:13',
-		name: 'name',
-		code: 'code',
-		cause: {
-			message: 'source error message',
-			stack: 'at <anonymous>:3:14',
-			name: 'name',
-			code: 'code',
-		},
-	};
-
-	const {cause} = deserializeError(object);
-	t.true(cause instanceof Error);
-	t.is(cause.message, 'source error message');
-	t.is(cause.stack, 'at <anonymous>:3:14');
-	t.is(cause.name, 'name');
-	t.is(cause.code, 'code');
-});
+		const {[property]: nested} = deserializeError(object);
+		t.true(nested instanceof Error);
+		t.is(nested.message, 'source error message');
+		t.is(nested.stack, 'at <anonymous>:3:14');
+		t.is(nested.name, 'name');
+		t.is(nested.code, 'code');
+	});
+}
 
 test('deserialized name, stack, cause an message should not be enumerable, other props should be', t => {
 	const object = {
@@ -340,6 +321,7 @@ test('should serialize custom error with `.toJSON`', t => {
 			};
 		}
 	}
+
 	const error = new CustomError();
 	const serialized = serializeError(error);
 	t.deepEqual(serialized, {
@@ -399,6 +381,32 @@ test('should serialize custom error with `.toJSON` defined with `serializeError`
 		value: 30,
 	});
 	t.not(stack, undefined);
+});
+
+test('should ignore `.toJSON` methods if set in the options', t => {
+	class CustomError extends Error {
+		constructor() {
+			super('foo');
+			this.name = this.constructor.name;
+			this.value = 10;
+		}
+
+		toJSON() {
+			return {
+				message: this.message,
+				amount: `$${this.value}`,
+			};
+		}
+	}
+
+	const error = new CustomError();
+	const serialized = serializeError(error, {useToJSON: false});
+	t.like(serialized, {
+		name: 'CustomError',
+		message: 'foo',
+		value: 10,
+	});
+	t.truthy(serialized.stack);
 });
 
 test('should serialize properties up to `Options.maxDepth` levels deep', t => {
