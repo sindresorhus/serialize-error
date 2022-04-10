@@ -1,4 +1,4 @@
-import nativeErrorConstructors from './error-constructors.js';
+import errorConstructors from './error-constructors.js';
 
 export class NonError extends Error {
 	name = 'NonError';
@@ -48,7 +48,7 @@ const toJSON = from => {
 	return json;
 };
 
-const getErrorConstructor = name => nativeErrorConstructors.get(name) || Error;
+const getErrorConstructor = name => errorConstructors.get(name) || Error;
 
 // eslint-disable-next-line complexity
 const destroyCircular = ({
@@ -186,3 +186,5 @@ export function isErrorLike(error) {
 	&& 'message' in error
 	&& 'stack' in error;
 }
+
+export {errorConstructors};
