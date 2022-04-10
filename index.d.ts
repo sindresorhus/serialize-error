@@ -146,9 +146,9 @@ const error = new Error('🦄');
 error.one = {two: {three: {}}};
 
 isErrorLike({
-name: 'DOMException',
-message: 'It happened',
-stack: 'at foo (index.js:2:9)',
+	name: 'DOMException',
+	message: 'It happened',
+	stack: 'at foo (index.js:2:9)',
 });
 //=> true
 
@@ -159,11 +159,11 @@ isErrorLike(serializeError(new Error('🦄'));
 //=> true
 
 isErrorLike({
-name: 'Bluberricious pancakes',
-stack: 12,
-ingredients: 'Blueberry',
+	name: 'Bluberricious pancakes',
+	stack: 12,
+	ingredients: 'Blueberry',
 });
 //=> false
 ```
 */
-export function isErrorLike(value: unknown): value is ErrorObject;
+export function isErrorLike(value: unknown): value is ErrorLike;

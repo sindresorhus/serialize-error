@@ -58,11 +58,13 @@ console.log(unknown);
 The [list of known errors](./error-constructors.js) can be extended globally. This also works if `serialize-error` is a sub-dependency that's not used directly.
 
 ```js
-import {AxiosError} from 'axios'
 import {errorConstructors} from 'serialize-error';
+import {MyCustomError} from './errors.js'
 
-errorConstructors.set('AxiosError', AxiosError)
+errorConstructors.set('MyCustomError', MyCustomError)
 ```
+
+**Warning:** Only simple and standard error constructors are supported, like `new MyCustomError(name)`. If your error constructor **requires** a second parameter or does not accept a string as first parameter, adding it to this map **will** break the deserialization.
 
 ## API
 
