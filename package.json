@@ -1,6 +1,6 @@
 {
 	"name": "serialize-error",
-	"version": "9.1.1",
+	"version": "10.0.0",
 	"description": "Serialize/deserialize an error into a plain object",
 	"license": "MIT",
 	"repository": "sindresorhus/serialize-error",
