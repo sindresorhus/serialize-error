@@ -13,7 +13,7 @@
 	"type": "module",
 	"exports": "./index.js",
 	"engines": {
-		"node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+		"node": ">=14.16"
 	},
 	"scripts": {
 		"test": "xo && ava && tsd"
@@ -36,11 +36,11 @@
 		"deserialize"
 	],
 	"dependencies": {
-		"type-fest": "^2.5.3"
+		"type-fest": "^2.12.2"
 	},
 	"devDependencies": {
-		"ava": "^3.15.0",
-		"tsd": "^0.18.0",
-		"xo": "^0.46.4"
+		"ava": "^4.2.0",
+		"tsd": "^0.20.0",
+		"xo": "^0.48.0"
 	}
 }

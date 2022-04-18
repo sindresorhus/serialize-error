@@ -33,7 +33,7 @@ console.log(deserialized);
 
 ### Error constructors
 
-When a serialized error with a known `name` is encountered, it will be deserialized using the corresponding error constructor, while enknown error names will be deserialized as regular errors:
+When a serialized error with a known `name` is encountered, it will be deserialized using the corresponding error constructor, while unknown error names will be deserialized as regular errors:
 
 ```js
 import {deserializeError} from 'serialize-error';
@@ -44,7 +44,7 @@ const known = deserializeError({
 });
 
 console.log(known);
-//=> [TypeError: 🦄] <-- still a TypeError
+//=> [TypeError: 🦄] <-- Still a TypeError
 
 const unknown = deserializeError({
 	name: 'TooManyCooksError',
@@ -52,7 +52,7 @@ const unknown = deserializeError({
 });
 
 console.log(unknown);
-//=> [Error: 🦄] <-- just a regular Error
+//=> [Error: 🦄] <-- Just a regular Error
 ```
 
 The [list of known errors](./error-constructors.js) can be extended globally. This also works if `serialize-error` is a sub-dependency that's not used directly.

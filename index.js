@@ -48,7 +48,7 @@ const toJSON = from => {
 	return json;
 };
 
-const getErrorConstructor = name => errorConstructors.get(name) || Error;
+const getErrorConstructor = name => errorConstructors.get(name) ?? Error;
 
 // eslint-disable-next-line complexity
 const destroyCircular = ({
@@ -60,7 +60,7 @@ const destroyCircular = ({
 	depth,
 	useToJSON,
 }) => {
-	const to = to_ || (Array.isArray(from) ? [] : {});
+	const to = to_ ?? (Array.isArray(from) ? [] : {});
 
 	seen.push(from);
 
@@ -152,7 +152,7 @@ export function serializeError(value, options = {}) {
 	// People sometimes throw things besides Error objects…
 	if (typeof value === 'function') {
 		// `JSON.stringify()` discards functions. We do too, unless a function is thrown directly.
-		return `[Function: ${value.name || 'anonymous'}]`;
+		return `[Function: ${value.name ?? 'anonymous'}]`;
 	}
 
 	return value;
@@ -187,4 +187,4 @@ export function isErrorLike(value) {
 	&& 'stack' in value;
 }
 
-export {errorConstructors};
+export {default as errorConstructors} from './error-constructors.js';
