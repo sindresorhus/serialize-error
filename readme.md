@@ -31,6 +31,41 @@ console.log(deserialized);
 //=> [Error: 🦄]
 ```
 
+### Error constructors
+
+When a serialized error with a known `name` is encountered, it will be deserialized using the corresponding error constructor, while enknown error names will be deserialized as regular errors:
+
+```js
+import {deserializeError} from 'serialize-error';
+
+const known = deserializeError({
+	name: 'TypeError',
+	message: '🦄'
+});
+
+console.log(known);
+//=> [TypeError: 🦄] <-- still a TypeError
+
+const unknown = deserializeError({
+	name: 'TooManyCooksError',
+	message: '🦄'
+});
+
+console.log(unknown);
+//=> [Error: 🦄] <-- just a regular Error
+```
+
+The [list of known errors](./error-constructors.js) can be extended globally. This also works if `serialize-error` is a sub-dependency that's not used directly.
+
+```js
+import {errorConstructors} from 'serialize-error';
+import {MyCustomError} from './errors.js'
+
+errorConstructors.set('MyCustomError', MyCustomError)
+```
+
+**Warning:** Only simple and standard error constructors are supported, like `new MyCustomError(name)`. If your error constructor **requires** a second parameter or does not accept a string as first parameter, adding it to this map **will** break the deserialization.
+
 ## API
 
 ### serializeError(value, options?)
@@ -93,6 +128,7 @@ Deserialize a plain object or any value into an `Error` object.
 - Non-enumerable properties are kept non-enumerable (name, message, stack, cause).
 - Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
 - Circular references are handled.
+- [Native error constructors](./error-constructors.js) are preserved (TypeError, DOMException, etc) and [more can be added.](#error-constructors)
 
 ### options
 

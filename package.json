@@ -20,7 +20,9 @@
 	},
 	"files": [
 		"index.js",
-		"index.d.ts"
+		"index.d.ts",
+		"error-constructors.js",
+		"error-constructors.d.ts"
 	],
 	"keywords": [
 		"error",

@@ -1,3 +1,5 @@
+import errorConstructors from './error-constructors.js';
+
 export class NonError extends Error {
 	name = 'NonError';
 
@@ -46,6 +48,8 @@ const toJSON = from => {
 	return json;
 };
 
+const getErrorConstructor = name => errorConstructors.get(name) || Error;
+
 // eslint-disable-next-line complexity
 const destroyCircular = ({
 	from,
@@ -68,16 +72,19 @@ const destroyCircular = ({
 		return toJSON(from);
 	}
 
-	const destroyLocal = value => destroyCircular({
-		from: value,
-		seen: [...seen],
-		// eslint-disable-next-line unicorn/error-message
-		to_: isErrorLike(value) ? new Error() : undefined,
-		forceEnumerable,
-		maxDepth,
-		depth,
-		useToJSON,
-	});
+	const destroyLocal = value => {
+		const Error = getErrorConstructor(value.name);
+		return destroyCircular({
+			from: value,
+			seen: [...seen],
+
+			to_: isErrorLike(value) ? new Error() : undefined,
+			forceEnumerable,
+			maxDepth,
+			depth,
+			useToJSON,
+		});
+	};
 
 	for (const [key, value] of Object.entries(from)) {
 		// eslint-disable-next-line node/prefer-global/buffer
@@ -159,10 +166,10 @@ export function deserializeError(value, options = {}) {
 	}
 
 	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+		const Error = getErrorConstructor(value.name);
 		return destroyCircular({
 			from: value,
 			seen: [],
-			// eslint-disable-next-line unicorn/error-message
 			to_: new Error(),
 			maxDepth,
 			depth: 0,
@@ -179,3 +186,5 @@ export function isErrorLike(value) {
 	&& 'message' in value
 	&& 'stack' in value;
 }
+
+export {errorConstructors};
