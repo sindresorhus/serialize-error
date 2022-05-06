@@ -132,16 +132,29 @@ test('should serialize nested errors', t => {
 
 	const serialized = serializeError(error);
 	t.is(serialized.message, 'outer error');
-	t.is(serialized.innerError.message, 'inner error');
+	t.like(serialized.innerError, {
+		name: 'Error',
+		message: 'inner error',
+	});
+	t.false(serialized.innerError instanceof Error);
 });
 
 test('should serialize the cause property', t => {
 	const error = new Error('outer error');
-	error.cause = new Error('inner error');
+	// TODO: Replace with plain `new Error('outer', {cause: new Error('inner')})` when targeting Node 16.9+
+	Object.defineProperty(error, 'cause', {
+		value: new Error('inner error'),
+		enumerable: false,
+		writable: true,
+	});
 
 	const serialized = serializeError(error);
 	t.is(serialized.message, 'outer error');
-	t.is(serialized.cause.message, 'inner error');
+	t.like(serialized.cause, {
+		name: 'Error',
+		message: 'inner error',
+	});
+	t.false(serialized.cause instanceof Error);
 });
 
 test('should handle top-level null values', t => {
