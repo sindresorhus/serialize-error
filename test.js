@@ -169,6 +169,10 @@ test('should deserialize array', t => {
 	deserializeNonError(t, [1]);
 });
 
+test('should deserialize empty object', t => {
+	deserializeNonError(t, {});
+});
+
 test('should ignore Error instance', t => {
 	const originalError = new Error('test');
 	const deserialized = deserializeError(originalError);

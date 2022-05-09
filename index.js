@@ -78,7 +78,7 @@ const destroyCircular = ({
 			from: value,
 			seen: [...seen],
 
-			to_: isErrorLike(value) ? new Error() : undefined,
+			to_: isMinimumViableSerializedError(value) ? new Error() : undefined,
 			forceEnumerable,
 			maxDepth,
 			depth,
@@ -165,7 +165,7 @@ export function deserializeError(value, options = {}) {
 		return value;
 	}
 
-	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+	if (isMinimumViableSerializedError(value)) {
 		const Error = getErrorConstructor(value.name);
 		return destroyCircular({
 			from: value,
@@ -185,6 +185,13 @@ export function isErrorLike(value) {
 	&& 'name' in value
 	&& 'message' in value
 	&& 'stack' in value;
+}
+
+function isMinimumViableSerializedError(value) {
+	return value
+		&& typeof value === 'object'
+		&& 'message' in value
+		&& !Array.isArray(value);
 }
 
 export {default as errorConstructors} from './error-constructors.js';
