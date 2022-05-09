@@ -59,6 +59,7 @@ const destroyCircular = ({
 	maxDepth,
 	depth,
 	useToJSON,
+	serialize,
 }) => {
 	const to = to_ ?? (Array.isArray(from) ? [] : {});
 
@@ -78,11 +79,12 @@ const destroyCircular = ({
 			from: value,
 			seen: [...seen],
 
-			to_: isErrorLike(value) ? new Error() : undefined,
+			to_: !serialize && isErrorLike(value) ? new Error() : undefined,
 			forceEnumerable,
 			maxDepth,
 			depth,
 			useToJSON,
+			serialize,
 		});
 	};
 
@@ -146,6 +148,7 @@ export function serializeError(value, options = {}) {
 			maxDepth,
 			depth: 0,
 			useToJSON,
+			serialize: true,
 		});
 	}
 
@@ -173,6 +176,7 @@ export function deserializeError(value, options = {}) {
 			to_: new Error(),
 			maxDepth,
 			depth: 0,
+			serialize: false,
 		});
 	}
 
