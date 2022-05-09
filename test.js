@@ -169,10 +169,19 @@ test('should deserialize array', t => {
 	deserializeNonError(t, [1]);
 });
 
+test('should ignore Error instance', t => {
+	const originalError = new Error('test');
+	const deserialized = deserializeError(originalError);
+	t.is(deserialized, originalError);
+});
+
 test('should deserialize error', t => {
-	const deserialized = deserializeError(new Error('test'));
+	const deserialized = deserializeError({
+		message: 'Stuff happened',
+	});
 	t.true(deserialized instanceof Error);
-	t.is(deserialized.message, 'test');
+	t.is(deserialized.name, 'Error');
+	t.is(deserialized.message, 'Stuff happened');
 });
 
 test('should deserialize and preserve existing properties', t => {
