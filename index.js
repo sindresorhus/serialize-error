@@ -180,7 +180,7 @@ export function deserializeError(value, options = {}) {
 }
 
 export function isErrorLike(value) {
-	return value
+	return Boolean(value)
 	&& typeof value === 'object'
 	&& 'name' in value
 	&& 'message' in value
@@ -188,10 +188,10 @@ export function isErrorLike(value) {
 }
 
 function isMinimumViableSerializedError(value) {
-	return value
-		&& typeof value === 'object'
-		&& 'message' in value
-		&& !Array.isArray(value);
+	return Boolean(value)
+	&& typeof value === 'object'
+	&& 'message' in value
+	&& !Array.isArray(value);
 }
 
 export {default as errorConstructors} from './error-constructors.js';
