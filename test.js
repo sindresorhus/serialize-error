@@ -250,7 +250,7 @@ for (const property of ['cause', 'any']) {
 	});
 }
 
-test('deserialized name, stack, cause an message should not be enumerable, other props should be', t => {
+test('deserialized name, stack, cause and message should not be enumerable, other props should be', t => {
 	const object = {
 		message: 'error message',
 		stack: 'at <anonymous>:1:13',
