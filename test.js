@@ -237,7 +237,13 @@ for (const property of ['cause', 'any']) {
 				message: 'source error message',
 				stack: 'at <anonymous>:3:14',
 				name: 'name',
-				code: 'code',
+				code: 'the apple',
+				[property]: {
+					message: 'original error message',
+					stack: 'at <anonymous>:16:9',
+					name: 'name',
+					code: 'the snake',
+				},
 			},
 		};
 
@@ -246,7 +252,14 @@ for (const property of ['cause', 'any']) {
 		t.is(nested.message, 'source error message');
 		t.is(nested.stack, 'at <anonymous>:3:14');
 		t.is(nested.name, 'name');
-		t.is(nested.code, 'code');
+		t.is(nested.code, 'the apple');
+
+		const {[property]: deepNested} = nested;
+		t.true(deepNested instanceof Error);
+		t.is(deepNested.message, 'original error message');
+		t.is(deepNested.stack, 'at <anonymous>:16:9');
+		t.is(deepNested.name, 'name');
+		t.is(deepNested.code, 'the snake');
 	});
 }
 
