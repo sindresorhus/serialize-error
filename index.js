@@ -54,13 +54,23 @@ const getErrorConstructor = name => errorConstructors.get(name) ?? Error;
 const destroyCircular = ({
 	from,
 	seen,
-	to_,
+	to,
 	forceEnumerable,
 	maxDepth,
 	depth,
 	useToJSON,
+	serialize,
 }) => {
-	const to = to_ ?? (Array.isArray(from) ? [] : {});
+	if (!to) {
+		if (Array.isArray(from)) {
+			to = [];
+		} else if (!serialize && isErrorLike(from)) {
+			const Error = getErrorConstructor(from.name);
+			to = new Error();
+		} else {
+			to = {};
+		}
+	}
 
 	seen.push(from);
 
@@ -72,19 +82,15 @@ const destroyCircular = ({
 		return toJSON(from);
 	}
 
-	const destroyLocal = value => {
-		const Error = getErrorConstructor(value.name);
-		return destroyCircular({
-			from: value,
-			seen: [...seen],
-
-			to_: isMinimumViableSerializedError(value) ? new Error() : undefined,
-			forceEnumerable,
-			maxDepth,
-			depth,
-			useToJSON,
-		});
-	};
+	const continueDestroyCircular = value => destroyCircular({
+		from: value,
+		seen: [...seen],
+		forceEnumerable,
+		maxDepth,
+		depth,
+		useToJSON,
+		serialize,
+	});
 
 	for (const [key, value] of Object.entries(from)) {
 		// eslint-disable-next-line node/prefer-global/buffer
@@ -110,7 +116,7 @@ const destroyCircular = ({
 
 		if (!seen.includes(from[key])) {
 			depth++;
-			to[key] = destroyLocal(from[key]);
+			to[key] = continueDestroyCircular(from[key]);
 
 			continue;
 		}
@@ -121,7 +127,7 @@ const destroyCircular = ({
 	for (const {property, enumerable} of commonProperties) {
 		if (typeof from[property] !== 'undefined' && from[property] !== null) {
 			Object.defineProperty(to, property, {
-				value: isErrorLike(from[property]) ? destroyLocal(from[property]) : from[property],
+				value: isErrorLike(from[property]) ? continueDestroyCircular(from[property]) : from[property],
 				enumerable: forceEnumerable ? true : enumerable,
 				configurable: true,
 				writable: true,
@@ -146,6 +152,7 @@ export function serializeError(value, options = {}) {
 			maxDepth,
 			depth: 0,
 			useToJSON,
+			serialize: true,
 		});
 	}
 
@@ -170,9 +177,10 @@ export function deserializeError(value, options = {}) {
 		return destroyCircular({
 			from: value,
 			seen: [],
-			to_: new Error(),
+			to: new Error(),
 			maxDepth,
 			depth: 0,
+			serialize: false,
 		});
 	}
 

@@ -11,6 +11,15 @@ function deserializeNonError(t, value) {
 	t.is(deserialized.message, JSON.stringify(value));
 }
 
+// TODO: Replace with plain `new Error('outer', {cause: new Error('inner')})` when targeting Node 16.9+
+function setErrorCause(error, cause) {
+	Object.defineProperty(error, 'cause', {
+		value: cause,
+		enumerable: false,
+		writable: true,
+	});
+}
+
 test('main', t => {
 	const serialized = serializeError(new Error('foo'));
 	const properties = Object.keys(serialized);
@@ -132,16 +141,30 @@ test('should serialize nested errors', t => {
 
 	const serialized = serializeError(error);
 	t.is(serialized.message, 'outer error');
-	t.is(serialized.innerError.message, 'inner error');
+	t.like(serialized.innerError, {
+		name: 'Error',
+		message: 'inner error',
+	});
+	t.false(serialized.innerError instanceof Error);
 });
 
 test('should serialize the cause property', t => {
 	const error = new Error('outer error');
-	error.cause = new Error('inner error');
+	setErrorCause(error, new Error('inner error'));
+	setErrorCause(error.cause, new Error('deeper error'));
 
 	const serialized = serializeError(error);
 	t.is(serialized.message, 'outer error');
-	t.is(serialized.cause.message, 'inner error');
+	t.like(serialized.cause, {
+		name: 'Error',
+		message: 'inner error',
+		cause: {
+			name: 'Error',
+			message: 'deeper error',
+		},
+	});
+	t.false(serialized.cause instanceof Error);
+	t.false(serialized.cause.cause instanceof Error);
 });
 
 test('should handle top-level null values', t => {
@@ -263,7 +286,7 @@ for (const property of ['cause', 'any']) {
 	});
 }
 
-test('deserialized name, stack, cause an message should not be enumerable, other props should be', t => {
+test('deserialized name, stack, cause and message should not be enumerable, other props should be', t => {
 	const object = {
 		message: 'error message',
 		stack: 'at <anonymous>:1:13',
