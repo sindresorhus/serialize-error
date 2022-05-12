@@ -172,7 +172,7 @@ export function deserializeError(value, options = {}) {
 		return value;
 	}
 
-	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+	if (isMinimumViableSerializedError(value)) {
 		const Error = getErrorConstructor(value.name);
 		return destroyCircular({
 			from: value,
@@ -188,11 +188,18 @@ export function deserializeError(value, options = {}) {
 }
 
 export function isErrorLike(value) {
-	return value
+	return Boolean(value)
 	&& typeof value === 'object'
 	&& 'name' in value
 	&& 'message' in value
 	&& 'stack' in value;
+}
+
+function isMinimumViableSerializedError(value) {
+	return Boolean(value)
+	&& typeof value === 'object'
+	&& 'message' in value
+	&& !Array.isArray(value);
 }
 
 export {default as errorConstructors} from './error-constructors.js';

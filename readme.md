@@ -64,13 +64,11 @@ import {MyCustomError} from './errors.js'
 errorConstructors.set('MyCustomError', MyCustomError)
 ```
 
-**Warning:** Only simple and standard error constructors are supported, like `new MyCustomError(name)`. If your error constructor **requires** a second parameter or does not accept a string as first parameter, adding it to this map **will** break the deserialization.
+**Warning:** Only simple and standard error constructors are supported, like `new MyCustomError(message)`. If your error constructor **requires** a second parameter or does not accept a string as first parameter, adding it to this map **will** break the deserialization.
 
 ## API
 
 ### serializeError(value, options?)
-
-Type: `Error | unknown`
 
 Serialize an `Error` object into a plain object.
 
@@ -83,7 +81,11 @@ Serialize an `Error` object into a plain object.
 - If the input object has a `.toJSON()` method, then it's called instead of serializing the object's properties.
 - It's up to `.toJSON()` implementation to handle circular references and enumerability of the properties.
 
-`.toJSON` examples:
+### value
+
+Type: `Error | unknown`
+
+### toJSON implementation examples
 
 ```js
 import {serializeError} from 'serialize-error';
@@ -118,17 +120,20 @@ serializeError(error);
 
 ### deserializeError(value, options?)
 
-Type: `{[key: string]: unknown} | unknown`
-
 Deserialize a plain object or any value into an `Error` object.
 
 - `Error` objects are passed through.
-- Non-error values are wrapped in a `NonError` error.
+- Objects that have at least a `message` property are interpreted as errors.
+- All other values are wrapped in a `NonError` error.
 - Custom properties are preserved.
 - Non-enumerable properties are kept non-enumerable (name, message, stack, cause).
 - Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
 - Circular references are handled.
 - [Native error constructors](./error-constructors.js) are preserved (TypeError, DOMException, etc) and [more can be added.](#error-constructors)
+
+### value
+
+Type: `{message: string} | unknown`
 
 ### options
 

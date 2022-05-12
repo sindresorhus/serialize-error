@@ -192,10 +192,23 @@ test('should deserialize array', t => {
 	deserializeNonError(t, [1]);
 });
 
+test('should deserialize empty object', t => {
+	deserializeNonError(t, {});
+});
+
+test('should ignore Error instance', t => {
+	const originalError = new Error('test');
+	const deserialized = deserializeError(originalError);
+	t.is(deserialized, originalError);
+});
+
 test('should deserialize error', t => {
-	const deserialized = deserializeError(new Error('test'));
+	const deserialized = deserializeError({
+		message: 'Stuff happened',
+	});
 	t.true(deserialized instanceof Error);
-	t.is(deserialized.message, 'test');
+	t.is(deserialized.name, 'Error');
+	t.is(deserialized.message, 'Stuff happened');
 });
 
 test('should deserialize and preserve existing properties', t => {
@@ -247,7 +260,13 @@ for (const property of ['cause', 'any']) {
 				message: 'source error message',
 				stack: 'at <anonymous>:3:14',
 				name: 'name',
-				code: 'code',
+				code: 'the apple',
+				[property]: {
+					message: 'original error message',
+					stack: 'at <anonymous>:16:9',
+					name: 'name',
+					code: 'the snake',
+				},
 			},
 		};
 
@@ -256,7 +275,14 @@ for (const property of ['cause', 'any']) {
 		t.is(nested.message, 'source error message');
 		t.is(nested.stack, 'at <anonymous>:3:14');
 		t.is(nested.name, 'name');
-		t.is(nested.code, 'code');
+		t.is(nested.code, 'the apple');
+
+		const {[property]: deepNested} = nested;
+		t.true(deepNested instanceof Error);
+		t.is(deepNested.message, 'original error message');
+		t.is(deepNested.stack, 'at <anonymous>:16:9');
+		t.is(deepNested.name, 'name');
+		t.is(deepNested.code, 'the snake');
 	});
 }
 
