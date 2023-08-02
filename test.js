@@ -498,3 +498,25 @@ test('should identify serialized errors', t => {
 		medium: 'Glass bottle in ocean',
 	}));
 });
+
+test('should serialize custom non-extensible error with custom `.toJSON` property', t => {
+	class CustomError extends Error {
+		constructor() {
+			super('foo');
+			this.name = this.constructor.name;
+		}
+
+		toJSON() {
+			return this;
+		}
+	}
+
+	const error = Object.preventExtensions(new CustomError());
+	const serialized = serializeError(error);
+	const {stack, ...rest} = serialized;
+	t.deepEqual(rest, {
+		name: 'CustomError',
+	});
+
+	t.not(stack, undefined);
+});

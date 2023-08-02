@@ -39,12 +39,12 @@ const commonProperties = [
 	},
 ];
 
-const toJsonWasCalled = Symbol('.toJSON was called');
+const toJsonWasCalled = new WeakSet();
 
 const toJSON = from => {
-	from[toJsonWasCalled] = true;
+	toJsonWasCalled.add(from);
 	const json = from.toJSON();
-	delete from[toJsonWasCalled];
+	toJsonWasCalled.delete(from);
 	return json;
 };
 
@@ -78,7 +78,7 @@ const destroyCircular = ({
 		return to;
 	}
 
-	if (useToJSON && typeof from.toJSON === 'function' && from[toJsonWasCalled] !== true) {
+	if (useToJSON && typeof from.toJSON === 'function' && !toJsonWasCalled.has(from)) {
 		return toJSON(from);
 	}
 
