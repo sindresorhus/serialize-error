@@ -520,3 +520,10 @@ test('should serialize custom non-extensible error with custom `.toJSON` propert
 
 	t.not(stack, undefined);
 });
+
+if ('DOMException' in globalThis) {
+	test('should serialize DOMException', t => {
+		const serialized = serializeError(new DOMException('x'));
+		t.is(serialized.message, 'x');
+	});
+}
