@@ -41,26 +41,17 @@ const commonProperties = [
 
 const toJsonWasCalled = new WeakSet();
 
-const toJSON = from => {
+const toJSON = (from) => {
 	toJsonWasCalled.add(from);
 	const json = from.toJSON();
 	toJsonWasCalled.delete(from);
 	return json;
 };
 
-const getErrorConstructor = name => errorConstructors.get(name) ?? Error;
+const getErrorConstructor = (name) => errorConstructors.get(name) ?? Error;
 
 // eslint-disable-next-line complexity
-const destroyCircular = ({
-	from,
-	seen,
-	to,
-	forceEnumerable,
-	maxDepth,
-	depth,
-	useToJSON,
-	serialize,
-}) => {
+const destroyCircular = ({ from, seen, to, forceEnumerable, maxDepth, depth, useToJSON, serialize }) => {
 	if (!to) {
 		if (Array.isArray(from)) {
 			to = [];
@@ -82,15 +73,16 @@ const destroyCircular = ({
 		return toJSON(from);
 	}
 
-	const continueDestroyCircular = value => destroyCircular({
-		from: value,
-		seen: [...seen],
-		forceEnumerable,
-		maxDepth,
-		depth,
-		useToJSON,
-		serialize,
-	});
+	const continueDestroyCircular = (value) =>
+		destroyCircular({
+			from: value,
+			seen: [...seen],
+			forceEnumerable,
+			maxDepth,
+			depth,
+			useToJSON,
+			serialize,
+		});
 
 	for (const [key, value] of Object.entries(from)) {
 		// eslint-disable-next-line node/prefer-global/buffer
@@ -128,7 +120,7 @@ const destroyCircular = ({
 		to[key] = '[Circular]';
 	}
 
-	for (const {property, enumerable} of commonProperties) {
+	for (const { property, enumerable } of commonProperties) {
 		if (typeof from[property] !== 'undefined' && from[property] !== null) {
 			Object.defineProperty(to, property, {
 				value: isErrorLike(from[property]) ? continueDestroyCircular(from[property]) : from[property],
@@ -143,10 +135,7 @@ const destroyCircular = ({
 };
 
 export function serializeError(value, options = {}) {
-	const {
-		maxDepth = Number.POSITIVE_INFINITY,
-		useToJSON = true,
-	} = options;
+	const { maxDepth = Number.POSITIVE_INFINITY, useToJSON = true } = options;
 
 	if (typeof value === 'object' && value !== null) {
 		return destroyCircular({
@@ -171,7 +160,7 @@ export function serializeError(value, options = {}) {
 }
 
 export function deserializeError(value, options = {}) {
-	const {maxDepth = Number.POSITIVE_INFINITY} = options;
+	const { maxDepth = Number.POSITIVE_INFINITY } = options;
 
 	if (value instanceof Error) {
 		return value;
@@ -193,18 +182,11 @@ export function deserializeError(value, options = {}) {
 }
 
 export function isErrorLike(value) {
-	return Boolean(value)
-	&& typeof value === 'object'
-	&& 'name' in value
-	&& 'message' in value
-	&& 'stack' in value;
+	return Boolean(value) && typeof value === 'object' && 'name' in value && 'message' in value && 'stack' in value;
 }
 
 function isMinimumViableSerializedError(value) {
-	return Boolean(value)
-	&& typeof value === 'object'
-	&& 'message' in value
-	&& !Array.isArray(value);
+	return Boolean(value) && typeof value === 'object' && 'message' in value && !Array.isArray(value);
 }
 
-export {default as errorConstructors} from './error-constructors.js';
+export { default as errorConstructors } from './error-constructors.js';

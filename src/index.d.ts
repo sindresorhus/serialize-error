@@ -1,6 +1,6 @@
-import {Primitive, JsonObject} from 'type-fest';
+import { JsonObject, Primitive } from 'type-fest';
 
-export {default as errorConstructors} from './error-constructors.js';
+export { default as errorConstructors } from './error-constructors.js';
 
 export type ErrorObject = {
 	name?: string;
@@ -105,9 +105,10 @@ serializeError(error);
 // => {horn: 'x', name, message, stack}
 ```
 */
-export function serializeError<ErrorType>(error: ErrorType, options?: Options): ErrorType extends Primitive
-	? ErrorType
-	: ErrorObject;
+export function serializeError<ErrorType>(
+	error: ErrorType,
+	options?: Options,
+): ErrorType extends Primitive ? ErrorType : ErrorObject;
 
 /**
 Deserialize a plain object or any value into an `Error` object.

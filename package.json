@@ -11,19 +11,26 @@
 		"url": "https://sindresorhus.com"
 	},
 	"type": "module",
-	"exports": "./index.js",
+	"exports": {
+		"import": "./src/index.js",
+		"require": "./dist/index.cjs",
+		"types": "./src/index.d.ts"
+	},
 	"engines": {
 		"node": ">=14.16"
 	},
 	"scripts": {
 		"//test": "xo && ava && tsd",
-		"test": "ava && tsd"
+		"test": "prettier -c src && ava && tsd",
+		"build": "tsup",
+		"prepare": "npm run build"
 	},
 	"files": [
-		"index.js",
-		"index.d.ts",
-		"error-constructors.js",
-		"error-constructors.d.ts"
+		"src/index.js",
+		"src/index.d.ts",
+		"src/error-constructors.js",
+		"src/error-constructors.d.ts",
+		"dist"
 	],
 	"keywords": [
 		"error",
@@ -40,8 +47,10 @@
 		"type-fest": "^2.12.2"
 	},
 	"devDependencies": {
-		"ava": "^4.2.0",
-		"tsd": "^0.20.0",
-		"xo": "^0.48.0"
+		"ava": "^5.3.1",
+		"prettier": "^3.0.3",
+		"tsd": "^0.29.0",
+		"tsup": "^7.2.0",
+		"xo": "^0.56.0"
 	}
 }
