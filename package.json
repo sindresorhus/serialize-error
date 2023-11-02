@@ -20,8 +20,8 @@
 		"node": ">=14.16"
 	},
 	"scripts": {
-		"//test": "xo && ava && tsd",
-		"test": "prettier -c src && ava && tsd",
+		"//test": "xo && ava && tsd -t src/index.d.ts -f src/index.test-d.ts",
+		"test": "prettier -c src && ava && tsd -t src/index.d.ts -f src/index.test-d.ts",
 		"build": "tsup",
 		"prepare": "npm run build"
 	},
