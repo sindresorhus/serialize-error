@@ -93,8 +93,7 @@ const destroyCircular = ({
 	});
 
 	for (const [key, value] of Object.entries(from)) {
-		if (value !== null && value.constructor !== null &&
-			typeof value.constructor.isBuffer === 'function' && value.constructor.isBuffer(value)) {
+		if (value && value instanceof Uint8Array && value.constructor.name === 'Buffer') {
 			to[key] = '[object Buffer]';
 			continue;
 		}
