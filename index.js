@@ -93,8 +93,7 @@ const destroyCircular = ({
 	});
 
 	for (const [key, value] of Object.entries(from)) {
-		// eslint-disable-next-line node/prefer-global/buffer
-		if (typeof Buffer === 'function' && Buffer.isBuffer(value)) {
+		if (value && value instanceof Uint8Array && value.constructor.name === 'Buffer') {
 			to[key] = '[object Buffer]';
 			continue;
 		}
