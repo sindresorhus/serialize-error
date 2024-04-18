@@ -1,48 +1,53 @@
 {
-	"name": "serialize-error",
-	"version": "11.0.3",
-	"description": "Serialize/deserialize an error into a plain object",
-	"license": "MIT",
-	"repository": "sindresorhus/serialize-error",
-	"funding": "https://github.com/sponsors/sindresorhus",
-	"author": {
-		"name": "Sindre Sorhus",
-		"email": "sindresorhus@gmail.com",
-		"url": "https://sindresorhus.com"
-	},
-	"type": "module",
-	"exports": "./index.js",
-	"sideEffects": false,
-	"engines": {
-		"node": ">=14.16"
-	},
-	"scripts": {
-		"//test": "xo && ava && tsd",
-		"test": "ava && tsd"
-	},
-	"files": [
-		"index.js",
-		"index.d.ts",
-		"error-constructors.js",
-		"error-constructors.d.ts"
-	],
-	"keywords": [
-		"error",
-		"serialize",
-		"stringify",
-		"object",
-		"convert",
-		"process",
-		"send",
-		"cause",
-		"deserialize"
-	],
-	"dependencies": {
-		"type-fest": "^2.12.2"
-	},
-	"devDependencies": {
-		"ava": "^4.2.0",
-		"tsd": "^0.20.0",
-		"xo": "^0.48.0"
-	}
+  "name": "serialize-error",
+  "version": "11.0.3",
+  "description": "Serialize/deserialize an error into a plain object",
+  "license": "MIT",
+  "repository": "sindresorhus/serialize-error",
+  "funding": "https://github.com/sponsors/sindresorhus",
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "https://sindresorhus.com"
+  },
+  "type": "module",
+  "exports": "./index.js",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=14.16"
+  },
+  "scripts": {
+    "//test": "xo && ava && tsd",
+    "test": "ava && tsd",
+    "build": "webpack",
+    "prepare": "npm run build"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "error-constructors.js",
+    "error-constructors.d.ts"
+  ],
+  "keywords": [
+    "error",
+    "serialize",
+    "stringify",
+    "object",
+    "convert",
+    "process",
+    "send",
+    "cause",
+    "deserialize"
+  ],
+  "dependencies": {
+    "type-fest": "^2.12.2"
+  },
+  "devDependencies": {
+    "ava": "^4.2.0",
+    "expose-loader": "^5.0.0",
+    "tsd": "^0.20.0",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4",
+    "xo": "^0.48.0"
+  }
 }
