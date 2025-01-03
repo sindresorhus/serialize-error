@@ -1,5 +1,7 @@
 import {expectType, expectAssignable} from 'tsd';
-import {serializeError, deserializeError, ErrorObject, Options} from './index.js';
+import {
+	serializeError, deserializeError, type ErrorObject, type Options,
+} from './index.js';
 
 const error = new Error('unicorn');
 

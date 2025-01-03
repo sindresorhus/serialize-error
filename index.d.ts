@@ -1,4 +1,4 @@
-import {Primitive, JsonObject} from 'type-fest';
+import {type Primitive, type JsonObject} from 'type-fest';
 
 export {default as errorConstructors} from './error-constructors.js';
 
@@ -19,7 +19,7 @@ export type ErrorLike = {
 	code?: string;
 };
 
-export interface Options {
+export type Options = {
 	/**
 	The maximum depth of properties to preserve when serializing/deserializing.
 
@@ -47,7 +47,7 @@ export interface Options {
 	@default true
 	*/
 	readonly useToJSON?: boolean;
-}
+};
 
 /**
 Serialize an `Error` object into a plain object.

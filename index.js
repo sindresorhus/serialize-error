@@ -128,7 +128,7 @@ const destroyCircular = ({
 	}
 
 	for (const {property, enumerable} of commonProperties) {
-		if (typeof from[property] !== 'undefined' && from[property] !== null) {
+		if (from[property] !== undefined && from[property] !== null) {
 			Object.defineProperty(to, property, {
 				value: isErrorLike(from[property]) ? continueDestroyCircular(from[property]) : from[property],
 				enumerable: forceEnumerable ? true : enumerable,

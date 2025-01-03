@@ -119,7 +119,7 @@ test('should drop functions', t => {
 
 	const serialized = serializeError(object);
 	t.deepEqual(serialized, {});
-	t.false(Object.prototype.hasOwnProperty.call(serialized, 'a'));
+	t.false(Object.hasOwn(serialized, 'a'));
 });
 
 test('should not access deep non-enumerable properties', t => {
@@ -467,13 +467,19 @@ test('should serialize properties up to `Options.maxDepth` levels deep', t => {
 	t.deepEqual(levelZero, {});
 
 	const levelOne = serializeError(error, {maxDepth: 1});
-	t.deepEqual(levelOne, {message, name, stack, one: {}});
+	t.deepEqual(levelOne, {
+		message, name, stack, one: {},
+	});
 
 	const levelTwo = serializeError(error, {maxDepth: 2});
-	t.deepEqual(levelTwo, {message, name, stack, one: {two: {}}});
+	t.deepEqual(levelTwo, {
+		message, name, stack, one: {two: {}},
+	});
 
 	const levelThree = serializeError(error, {maxDepth: 3});
-	t.deepEqual(levelThree, {message, name, stack, one: {two: {three: {}}}});
+	t.deepEqual(levelThree, {
+		message, name, stack, one: {two: {three: {}}},
+	});
 });
 
 test('should identify serialized errors', t => {
