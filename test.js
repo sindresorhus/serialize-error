@@ -11,15 +11,6 @@ function deserializeNonError(t, value) {
 	t.is(deserialized.message, JSON.stringify(value));
 }
 
-// TODO: Replace with plain `new Error('outer', {cause: new Error('inner')})` when targeting Node 16.9+
-function setErrorCause(error, cause) {
-	Object.defineProperty(error, 'cause', {
-		value: cause,
-		enumerable: false,
-		writable: true,
-	});
-}
-
 test('main', t => {
 	const serialized = serializeError(new Error('foo'));
 	const properties = Object.keys(serialized);
@@ -149,9 +140,11 @@ test('should serialize nested errors', t => {
 });
 
 test('should serialize the cause property', t => {
-	const error = new Error('outer error');
-	setErrorCause(error, new Error('inner error'));
-	setErrorCause(error.cause, new Error('deeper error'));
+	const error = new Error('outer error', {
+		cause: new Error('inner error', {
+			cause: new Error('deeper error'),
+		}),
+	});
 
 	const serialized = serializeError(error);
 	t.is(serialized.message, 'outer error');
