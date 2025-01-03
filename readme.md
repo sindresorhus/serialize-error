@@ -2,7 +2,7 @@
 
 > Serialize/deserialize an error into a plain object
 
-Useful if you for example need to `process.send()` the error.
+Useful if you for example need to `JSON.stringify()` or `process.send()` the error.
 
 ## Install
 
