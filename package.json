@@ -14,11 +14,10 @@
 	"exports": "./index.js",
 	"sideEffects": false,
 	"engines": {
-		"node": ">=14.16"
+		"node": ">=18"
 	},
 	"scripts": {
-		"//test": "xo && ava && tsd",
-		"test": "ava && tsd"
+		"test": "xo && ava && tsd"
 	},
 	"files": [
 		"index.js",
@@ -38,11 +37,11 @@
 		"deserialize"
 	],
 	"dependencies": {
-		"type-fest": "^2.12.2"
+		"type-fest": "^4.31.0"
 	},
 	"devDependencies": {
-		"ava": "^4.2.0",
-		"tsd": "^0.20.0",
-		"xo": "^0.48.0"
+		"ava": "^6.2.0",
+		"tsd": "^0.31.2",
+		"xo": "^0.60.0"
 	}
 }
