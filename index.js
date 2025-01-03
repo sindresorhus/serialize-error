@@ -16,7 +16,7 @@ export class NonError extends Error {
 	}
 }
 
-const commonProperties = [
+const errorProperties = [
 	{
 		property: 'name',
 		enumerable: false,
@@ -127,14 +127,16 @@ const destroyCircular = ({
 		to[key] = '[Circular]';
 	}
 
-	for (const {property, enumerable} of commonProperties) {
-		if (from[property] !== undefined && from[property] !== null) {
-			Object.defineProperty(to, property, {
-				value: isErrorLike(from[property]) ? continueDestroyCircular(from[property]) : from[property],
-				enumerable: forceEnumerable ? true : enumerable,
-				configurable: true,
-				writable: true,
-			});
+	if (serialize || to instanceof Error) {
+		for (const {property, enumerable} of errorProperties) {
+			if (from[property] !== undefined && from[property] !== null) {
+				Object.defineProperty(to, property, {
+					value: isErrorLike(from[property]) ? continueDestroyCircular(from[property]) : from[property],
+					enumerable: forceEnumerable ? true : enumerable,
+					configurable: true,
+					writable: true,
+				});
+			}
 		}
 	}
 
