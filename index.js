@@ -54,7 +54,7 @@ const toJSON = from => {
 
 const newError = name => {
 	const ErrorConstructor = errorConstructors.get(name) ?? Error;
-	return ErrorConstructor === globalThis.AggregateError
+	return ErrorConstructor === AggregateError
 		? new ErrorConstructor([])
 		: new ErrorConstructor();
 };
