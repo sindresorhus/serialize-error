@@ -205,15 +205,16 @@ export function deserializeError(value, options = {}) {
 export function isErrorLike(value) {
 	return Boolean(value)
 	&& typeof value === 'object'
-	&& 'name' in value
-	&& 'message' in value
-	&& 'stack' in value;
+	&& typeof value.name === 'string'
+	&& typeof value.message === 'string'
+	&& typeof value.stack === 'string';
 }
 
+// Used as a weak check for immediately-passed objects, whereas `isErrorLike` is used for nested values to avoid bad detection
 function isMinimumViableSerializedError(value) {
 	return Boolean(value)
 	&& typeof value === 'object'
-	&& 'message' in value
+	&& typeof value.message === 'string'
 	&& !Array.isArray(value);
 }
 

@@ -2,7 +2,12 @@ import {Buffer} from 'node:buffer';
 import Stream from 'node:stream';
 import test from 'ava';
 import errorConstructors from './error-constructors.js';
-import {serializeError, deserializeError, isErrorLike} from './index.js';
+import {
+	serializeError,
+	deserializeError,
+	isErrorLike,
+	NonError,
+} from './index.js';
 
 function deserializeNonError(t, value) {
 	const deserialized = deserializeError(value);
@@ -378,6 +383,44 @@ test('should deserialize AggregateError', t => {
 	t.true(Array.isArray(deserialized.errors));
 	t.is(deserialized.errors[0].message, 'inner error');
 	t.true(deserialized.errors[0] instanceof Error);
+});
+
+test('should ignore invalid error-like objects', t => {
+	const errorLike = {
+		name: 'Error',
+		message: 'Some error message',
+	};
+
+	const nonErrorLike = {
+		name: 'Error',
+		message: (new class Message {}('Bottle')),
+	};
+
+	t.true(deserializeError(errorLike) instanceof Error);
+	t.true(deserializeError(nonErrorLike) instanceof NonError);
+});
+
+test('should ignore nested invalid error-like objects', t => {
+	const errorLike = {
+		message: 'Base',
+		nested: {
+			name: 'Error',
+			message: 'Some error message',
+			stack: 'at <anonymous>:1:13',
+		},
+	};
+
+	const nonErrorLike = {
+		message: 'Base',
+		nested: {
+			name: 'Error',
+			message: (new class Message {}('Bottle')),
+			stack: 'at <anonymous>:1:13',
+		},
+	};
+
+	t.true(deserializeError(errorLike).nested instanceof Error);
+	t.false(deserializeError(nonErrorLike).nested instanceof Error);
 });
 
 test('should serialize Date as ISO string', t => {
