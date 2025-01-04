@@ -1,5 +1,6 @@
 const list = [
 	// Native ES errors https://262.ecma-international.org/12.0/#sec-well-known-intrinsic-objects
+	Error,
 	EvalError,
 	RangeError,
 	ReferenceError,
@@ -22,6 +23,20 @@ const list = [
 		constructor => [constructor.name, constructor],
 	);
 
-const errorConstructors = new Map(list);
+export const errorConstructors = new Map(list);
 
-export default errorConstructors;
+export function addKnownErrorConstructor(constructor) {
+	const {name} = constructor;
+	if (errorConstructors.has(name)) {
+		throw new Error(`The error constructor "${name}" is already known.`);
+	}
+
+	try {
+		// eslint-disable-next-line no-new -- It just needs to be verified
+		new constructor();
+	} catch (error) {
+		throw new Error(`The error constructor "${name}" is not compatible`, {cause: error});
+	}
+
+	errorConstructors.set(name, constructor);
+}

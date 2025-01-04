@@ -1,7 +1,7 @@
 import {Buffer} from 'node:buffer';
 import Stream from 'node:stream';
 import test from 'ava';
-import errorConstructors from './error-constructors.js';
+import {errorConstructors, addKnownErrorConstructor} from './error-constructors.js';
 import {
 	serializeError,
 	deserializeError,
@@ -243,6 +243,19 @@ for (const [name, CustomError] of errorConstructors) {
 		t.is(deserialized.message, 'foo');
 	});
 }
+
+test('should not allow adding incompatible or redundant error constructors', t => {
+	t.throws(() => {
+		addKnownErrorConstructor(Error);
+	}, {message: 'The error constructor "Error" is already known.'});
+	t.throws(() => {
+		addKnownErrorConstructor(class BadError {
+			constructor() {
+				throw new Error('The number you have dialed is not in service');
+			}
+		});
+	}, {message: 'The error constructor "BadError" is not compatible'});
+});
 
 test('should deserialize plain object', t => {
 	const object = {
