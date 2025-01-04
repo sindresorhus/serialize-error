@@ -9,6 +9,7 @@ import {
 const error = new Error('unicorn');
 
 expectType<number>(serializeError(1));
+expectType<unknown>(serializeError(error as unknown));
 expectType<ErrorObject>(serializeError(error));
 expectAssignable<Options>({maxDepth: 1});
 
