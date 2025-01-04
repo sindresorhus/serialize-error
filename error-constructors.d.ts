@@ -3,6 +3,8 @@ Let `serialize-error` know about your custom error constructors so that when `{n
 
 Warning: The constructor must work without any arguments or this function will throw.
 */
-declare function addKnownErrorConstructor(constructor: ErrorConstructor): void;
+
+type BaseErrorConstructor = new (message?: string, ...arguments_: unknown[]) => Error;
+declare function addKnownErrorConstructor(constructor: BaseErrorConstructor): void;
 
 export {addKnownErrorConstructor};
