@@ -26,7 +26,6 @@ export const errorConstructors = new Map(list);
 
 export function addKnownErrorConstructor(constructor) {
 	const {name} = constructor;
-	console.log(name);
 	if (errorConstructors.has(name)) {
 		throw new Error(`The error constructor "${name}" is already known.`);
 	}
