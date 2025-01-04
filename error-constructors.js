@@ -6,6 +6,7 @@ const list = [
 	SyntaxError,
 	TypeError,
 	URIError,
+	AggregateError,
 
 	// Built-in errors
 	globalThis.DOMException,
