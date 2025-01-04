@@ -284,7 +284,7 @@ for (const property of ['cause', 'any']) {
 	});
 }
 
-test('deserialized name, stack, cause and message should not be enumerable, other props should be', t => {
+test('deserialized Error class properties should not be enumerable, other props should be', t => {
 	const object = {
 		message: 'error message',
 		stack: 'at <anonymous>:1:13',
@@ -302,6 +302,10 @@ test('deserialized name, stack, cause and message should not be enumerable, othe
 		errno: 1,
 		syscall: 'syscall',
 		randomProperty: 'random',
+		notAnError: {
+			stack: 'Not an error',
+			cause: 'Wasn’t me',
+		},
 	};
 
 	const deserialized = deserializeError({...object, ...enumerables});
@@ -309,6 +313,11 @@ test('deserialized name, stack, cause and message should not be enumerable, othe
 	t.deepEqual(
 		Object.keys(enumerables),
 		Object.keys(deserialized),
+	);
+
+	t.deepEqual(
+		Object.keys(enumerables.notAnError),
+		Object.keys(deserialized.notAnError),
 	);
 });
 
