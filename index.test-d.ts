@@ -2,6 +2,7 @@ import {expectTypeOf} from 'expect-type';
 import {
 	serializeError,
 	deserializeError,
+	addKnownErrorConstructor,
 	type ErrorObject,
 	type Options,
 } from './index.js';
@@ -19,3 +20,8 @@ expectTypeOf(deserializeError({
 	name: 'name',
 	code: 'code',
 })).toEqualTypeOf<Error>();
+
+addKnownErrorConstructor(Error);
+
+class CustomError extends Error {}
+addKnownErrorConstructor(CustomError);

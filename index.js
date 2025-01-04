@@ -1,4 +1,4 @@
-import errorConstructors from './error-constructors.js';
+import {errorConstructors} from './error-constructors.js';
 
 export class NonError extends Error {
 	name = 'NonError';
@@ -209,4 +209,4 @@ function isMinimumViableSerializedError(value) {
 	&& !Array.isArray(value);
 }
 
-export {default as errorConstructors} from './error-constructors.js';
+export {addKnownErrorConstructor} from './error-constructors.js';
