@@ -3,7 +3,10 @@ import Stream from 'node:stream';
 import test from 'ava';
 import errorConstructors from './error-constructors.js';
 import {
-	serializeError, deserializeError, isErrorLike, NonError,
+	serializeError,
+	deserializeError,
+	isErrorLike,
+	NonError,
 } from './index.js';
 
 function deserializeNonError(t, value) {
