@@ -2,6 +2,7 @@ import {expectType, expectAssignable} from 'tsd';
 import {
 	serializeError,
 	deserializeError,
+	addKnownErrorConstructor,
 	type ErrorObject,
 	type Options,
 } from './index.js';
@@ -18,3 +19,8 @@ expectType<Error>(deserializeError({
 	name: 'name',
 	code: 'code',
 }));
+
+addKnownErrorConstructor(Error);
+
+class CustomError extends Error {}
+addKnownErrorConstructor(CustomError);

@@ -1,8 +1,10 @@
 /**
-Map of error constructors to recreate from the serialize `name` property. If the name is not found in this map, the errors will be deserialized as simple `Error` instances.
+Let `serialize-error` know about your custom error constructors so that when `{name: 'MyCustomError', message: 'It broke'}` is found, it uses the right error constructor. If "MyCustomError" isn't found in the global list of known constructors, it defaults to the base `Error` error constructor.
 
-Warning: Only simple and standard error constructors are supported, like `new MyCustomError(name)`. If your error constructor *requires* a second parameter or does not accept a string as first parameter, adding it to this map *will* break the deserialization.
+Warning: The constructor must work without any arguments or this function will throw.
 */
-declare const errorConstructors: Map<string, ErrorConstructor>;
 
-export default errorConstructors;
+type BaseErrorConstructor = new (message?: string, ...arguments_: unknown[]) => Error;
+declare function addKnownErrorConstructor(constructor: BaseErrorConstructor): void;
+
+export {addKnownErrorConstructor};
