@@ -37,6 +37,10 @@ const errorProperties = [
 		property: 'cause',
 		enumerable: false,
 	},
+	{
+		property: 'errors',
+		enumerable: false,
+	},
 ];
 
 const toJsonWasCalled = new WeakSet();
@@ -48,7 +52,12 @@ const toJSON = from => {
 	return json;
 };
 
-const getErrorConstructor = name => errorConstructors.get(name) ?? Error;
+const newError = name => {
+	const ErrorConstructor = errorConstructors.get(name) ?? Error;
+	return ErrorConstructor === AggregateError
+		? new ErrorConstructor([])
+		: new ErrorConstructor();
+};
 
 // eslint-disable-next-line complexity
 const destroyCircular = ({
@@ -65,8 +74,7 @@ const destroyCircular = ({
 		if (Array.isArray(from)) {
 			to = [];
 		} else if (!serialize && isErrorLike(from)) {
-			const Error = getErrorConstructor(from.name);
-			to = new Error();
+			to = newError(from.name);
 		} else {
 			to = {};
 		}
@@ -131,7 +139,9 @@ const destroyCircular = ({
 		for (const {property, enumerable} of errorProperties) {
 			if (from[property] !== undefined && from[property] !== null) {
 				Object.defineProperty(to, property, {
-					value: isErrorLike(from[property]) ? continueDestroyCircular(from[property]) : from[property],
+					value: isErrorLike(from[property]) || Array.isArray(from[property])
+						? continueDestroyCircular(from[property])
+						: from[property],
 					enumerable: forceEnumerable ? true : enumerable,
 					configurable: true,
 					writable: true,
@@ -179,11 +189,10 @@ export function deserializeError(value, options = {}) {
 	}
 
 	if (isMinimumViableSerializedError(value)) {
-		const Error = getErrorConstructor(value.name);
 		return destroyCircular({
 			from: value,
 			seen: [],
-			to: new Error(),
+			to: newError(value.name),
 			maxDepth,
 			depth: 0,
 			serialize: false,

@@ -165,6 +165,20 @@ test('should serialize the cause property', t => {
 	t.false(serialized.cause.cause instanceof Error);
 });
 
+test('should serialize AggregateError', t => {
+	// eslint-disable-next-line unicorn/error-message -- Testing this eventuality
+	const error = new AggregateError([new Error('inner error')]);
+
+	const serialized = serializeError(error);
+	t.is(serialized.message, ''); // Default error message
+	t.true(Array.isArray(serialized.errors));
+	t.like(serialized.errors[0], {
+		name: 'Error',
+		message: 'inner error',
+	});
+	t.false(serialized.errors[0] instanceof Error);
+});
+
 test('should handle top-level null values', t => {
 	const serialized = serializeError(null);
 	t.is(serialized, null);
@@ -367,6 +381,21 @@ test('should deserialize properties up to `Options.maxDepth` levels deep', t => 
 	error.one = {two: {three: {}}};
 	t.is(levelThree instanceof Error, true);
 	t.deepEqual(levelThree, error);
+});
+
+test('should deserialize AggregateError', t => {
+	const deserialized = deserializeError({
+		name: 'AggregateError',
+		message: '',
+		errors: [
+			{name: 'Error', message: 'inner error', stack: ''},
+		],
+	});
+	t.true(deserialized instanceof AggregateError);
+	t.is(deserialized.message, '');
+	t.true(Array.isArray(deserialized.errors));
+	t.is(deserialized.errors[0].message, 'inner error');
+	t.true(deserialized.errors[0] instanceof Error);
 });
 
 test('should ignore invalid error-like objects', t => {
