@@ -1,4 +1,4 @@
-import {expectType, expectAssignable} from 'tsd';
+import {expectTypeOf} from 'expect-type';
 import {
 	serializeError,
 	deserializeError,
@@ -9,16 +9,17 @@ import {
 
 const error = new Error('unicorn');
 
-expectType<number>(serializeError(1));
-expectType<ErrorObject>(serializeError(error));
-expectAssignable<Options>({maxDepth: 1});
+expectTypeOf(serializeError(1)).toEqualTypeOf<number>();
+expectTypeOf(serializeError(error as unknown)).toEqualTypeOf<unknown>();
+expectTypeOf(serializeError(error)).toEqualTypeOf<ErrorObject>();
+expectTypeOf({maxDepth: 1}).toMatchTypeOf<Options>();
 
-expectType<Error>(deserializeError({
+expectTypeOf(deserializeError({
 	message: 'error message',
 	stack: 'at <anonymous>:1:13',
 	name: 'name',
 	code: 'code',
-}));
+})).toEqualTypeOf<Error>();
 
 addKnownErrorConstructor(Error);
 

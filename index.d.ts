@@ -107,7 +107,9 @@ serializeError(error);
 */
 export function serializeError<ErrorType>(error: ErrorType, options?: Options): ErrorType extends Primitive
 	? ErrorType
-	: ErrorObject;
+	: unknown extends ErrorType
+		? unknown
+		: ErrorObject;
 
 /**
 Deserialize a plain object or any value into an `Error` object.
