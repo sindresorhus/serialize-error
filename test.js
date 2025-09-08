@@ -619,4 +619,22 @@ if ('DOMException' in globalThis) {
 		const serialized = serializeError(new DOMException('x'));
 		t.is(serialized.message, 'x');
 	});
+
+	test('should deep clone DOMException when it is in the cause property', t => {
+		const domException = new DOMException('My domException', 'NotFoundError');
+		const error = new Error('My error message', {
+			cause: domException,
+		});
+
+		const serialized = serializeError(error);
+
+		t.is(serialized.message, 'My error message');
+		t.is(serialized.cause.message, 'My domException');
+		t.is(serialized.cause.name, 'NotFoundError');
+		t.is(serialized.cause.code, 8);
+		// Should be a deep clone, not the same reference
+		t.not(serialized.cause, domException);
+		t.false(serialized.cause instanceof DOMException);
+		t.false(serialized.cause instanceof Error);
+	});
 }
