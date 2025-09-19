@@ -273,6 +273,29 @@ test('should deserialize plain object', t => {
 	t.is(deserialized.code, 'code');
 });
 
+test('should preserve buffers when deserializing', t => {
+	const buffer = Buffer.from([1, 2, 3]);
+	const deserialized = deserializeError({
+		message: 'buffer',
+		stack: '',
+		data: buffer,
+	});
+
+	t.true(Buffer.isBuffer(deserialized.data));
+	t.is(deserialized.data, buffer);
+});
+
+test('should preserve functions when deserializing', t => {
+	const sideEffect = () => 'no-op';
+	const deserialized = deserializeError({
+		message: 'function',
+		stack: '',
+		callback: sideEffect,
+	});
+
+	t.is(deserialized.callback, sideEffect);
+});
+
 for (const property of ['cause', 'any']) {
 	// `cause` is treated differently from other properties in the code
 	test(`should deserialize errors on ${property} property`, t => {

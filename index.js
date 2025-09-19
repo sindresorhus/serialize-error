@@ -102,17 +102,21 @@ const destroyCircular = ({
 
 	for (const [key, value] of Object.entries(from)) {
 		if (value && value instanceof Uint8Array && value.constructor.name === 'Buffer') {
-			to[key] = '[object Buffer]';
+			to[key] = serialize ? '[object Buffer]' : value;
 			continue;
 		}
 
 		// TODO: Use `stream.isReadable()` when targeting Node.js 18.
 		if (value !== null && typeof value === 'object' && typeof value.pipe === 'function') {
-			to[key] = '[object Stream]';
+			to[key] = serialize ? '[object Stream]' : value;
 			continue;
 		}
 
 		if (typeof value === 'function') {
+			if (!serialize) {
+				to[key] = value;
+			}
+
 			continue;
 		}
 
