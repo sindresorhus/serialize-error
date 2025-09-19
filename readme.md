@@ -72,10 +72,10 @@ addKnownErrorConstructor(MyCustomError);
 
 Serialize an `Error` object into a plain object.
 
-- Non-error values are passed through.
 - Custom properties are preserved.
 - Non-enumerable properties are kept non-enumerable (name, message, stack).
 - Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
+- Primitive values (including `null`, `undefined`, strings, numbers, etc.) and functions are wrapped in a `NonError` error and serialized.
 - Buffer properties are replaced with `[object Buffer]`.
 - Circular references are handled.
 - If the input object has a `.toJSON()` method, then it's called instead of serializing the object's properties.
@@ -186,7 +186,7 @@ isErrorLike({
 isErrorLike(new Error('🦄'));
 //=> true
 
-isErrorLike(serializeError(new Error('🦄'));
+isErrorLike(serializeError(new Error('🦄')));
 //=> true
 
 isErrorLike({

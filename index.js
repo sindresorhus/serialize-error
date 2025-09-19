@@ -8,8 +8,13 @@ export class NonError extends Error {
 	}
 
 	static _prepareSuperMessage(message) {
+		// Handle BigInt specially to show the 'n' suffix
+		if (typeof message === 'bigint') {
+			return `${message}n`;
+		}
+
 		try {
-			return JSON.stringify(message);
+			return JSON.stringify(message) ?? String(message);
 		} catch {
 			return String(message);
 		}
@@ -177,12 +182,18 @@ export function serializeError(value, options = {}) {
 
 	// People sometimes throw things besides Error objects…
 	if (typeof value === 'function') {
-		// `JSON.stringify()` discards functions. We do too, unless a function is thrown directly.
-		// We intentionally use `||` because `.name` is an empty string for anonymous functions.
-		return `[Function: ${value.name || 'anonymous'}]`;
+		value = '<Function>';
 	}
 
-	return value;
+	return destroyCircular({
+		from: new NonError(value),
+		seen: [],
+		forceEnumerable: true,
+		maxDepth,
+		depth: 0,
+		useToJSON,
+		serialize: true,
+	});
 }
 
 export function deserializeError(value, options = {}) {
