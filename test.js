@@ -98,15 +98,6 @@ test('should discard streams', t => {
 	t.deepEqual(serializeError({s: new Stream.PassThrough()}), {s: '[object Stream]'}, 'Stream.PassThrough');
 });
 
-test('should replace top-level functions with a helpful string', t => {
-	function a() {}
-	function b() {}
-	a.b = b;
-
-	const serialized = serializeError(a);
-	t.is(serialized, '[Function: a]');
-});
-
 test('should drop functions', t => {
 	function a() {}
 	a.foo = 'bar;';
@@ -179,9 +170,56 @@ test('should serialize AggregateError', t => {
 	t.false(serialized.errors[0] instanceof Error);
 });
 
-test('should handle top-level null values', t => {
+test('should serialize undefined to NonError', t => {
+	const serialized = serializeError(undefined);
+	t.is(serialized.name, 'NonError');
+	t.is(serialized.message, 'undefined');
+	t.truthy(serialized.stack);
+});
+
+test('should serialize values to NonError', t => {
+	// String
+	const stringResult = serializeError('hello');
+	t.is(stringResult.name, 'NonError');
+	t.is(stringResult.message, '"hello"');
+	t.truthy(stringResult.stack);
+
+	// Number
+	const numberResult = serializeError(42);
+	t.is(numberResult.name, 'NonError');
+	t.is(numberResult.message, '42');
+	t.truthy(numberResult.stack);
+
+	// Boolean
+	const booleanResult = serializeError(true);
+	t.is(booleanResult.name, 'NonError');
+	t.is(booleanResult.message, 'true');
+	t.truthy(booleanResult.stack);
+
+	// Symbol
+	const symbolResult = serializeError(Symbol('test'));
+	t.is(symbolResult.name, 'NonError');
+	t.is(symbolResult.message, 'Symbol(test)');
+	t.truthy(symbolResult.stack);
+
+	// BigInt
+	const bigIntResult = serializeError(BigInt(123));
+	t.is(bigIntResult.name, 'NonError');
+	t.is(bigIntResult.message, '123n');
+	t.truthy(bigIntResult.stack);
+
+	// Function
+	const functionResult = serializeError(() => {});
+	t.is(functionResult.name, 'NonError');
+	t.is(functionResult.message, '"<Function>"');
+	t.truthy(functionResult.stack);
+});
+
+test('should serialize null to NonError', t => {
 	const serialized = serializeError(null);
-	t.is(serialized, null);
+	t.is(serialized.name, 'NonError');
+	t.is(serialized.message, 'null');
+	t.truthy(serialized.stack);
 });
 
 test('should deserialize null', t => {

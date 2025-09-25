@@ -52,8 +52,10 @@ export type Options = {
 /**
 Serialize an `Error` object into a plain object.
 
-- Non-error values are passed through.
 - Custom properties are preserved.
+- Non-enumerable properties are kept non-enumerable (name, message, stack).
+- Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
+- Primitive values (including `null`, `undefined`, strings, numbers, etc.) and functions are wrapped in a `NonError` error and serialized.
 - Buffer properties are replaced with `[object Buffer]`.
 - Circular references are handled.
 - If the input object has a `.toJSON()` method, then it's called instead of serializing the object's properties.
@@ -105,11 +107,7 @@ serializeError(error);
 // => {horn: 'x', name, message, stack}
 ```
 */
-export function serializeError<ErrorType>(error: ErrorType, options?: Options): ErrorType extends Primitive
-	? ErrorType
-	: unknown extends ErrorType
-		? unknown
-		: ErrorObject;
+export function serializeError(error: unknown, options?: Options): ErrorObject;
 
 /**
 Deserialize a plain object or any value into an `Error` object.
@@ -159,7 +157,7 @@ isErrorLike({
 isErrorLike(new Error('🦄'));
 //=> true
 
-isErrorLike(serializeError(new Error('🦄'));
+isErrorLike(serializeError(new Error('🦄')));
 //=> true
 
 isErrorLike({
