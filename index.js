@@ -1,5 +1,5 @@
 import NonError from 'non-error';
-import {errorConstructors} from './error-constructors.js';
+import {errorConstructors, errorFactories} from './error-constructors.js';
 
 const errorProperties = [
 	{
@@ -38,6 +38,18 @@ const toJSON = from => {
 };
 
 const newError = name => {
+	const factory = errorFactories.get(name);
+	if (factory) {
+		try {
+			const result = factory();
+			if (result instanceof Error) {
+				return result;
+			}
+		} catch {
+			// Fall back to constructor if factory fails
+		}
+	}
+
 	const ErrorConstructor = errorConstructors.get(name) ?? Error;
 	return ErrorConstructor === AggregateError
 		? new ErrorConstructor([])

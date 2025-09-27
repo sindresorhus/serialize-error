@@ -170,14 +170,7 @@ test('should serialize AggregateError', t => {
 	t.false(serialized.errors[0] instanceof Error);
 });
 
-test('should serialize undefined to NonError', t => {
-	const serialized = serializeError(undefined);
-	t.is(serialized.name, 'NonError');
-	t.regex(serialized.message, /^Non-error value:/);
-	t.truthy(serialized.stack);
-});
-
-test('should serialize values to NonError', t => {
+test('should serialize non-error values to NonError', t => {
 	// String
 	const stringResult = serializeError('hello');
 	t.is(stringResult.name, 'NonError');
@@ -213,37 +206,25 @@ test('should serialize values to NonError', t => {
 	t.is(functionResult.name, 'NonError');
 	t.regex(functionResult.message, /^Non-error value:/);
 	t.truthy(functionResult.stack);
+
+	// Undefined
+	const undefinedResult = serializeError(undefined);
+	t.is(undefinedResult.name, 'NonError');
+	t.regex(undefinedResult.message, /^Non-error value:/);
+	t.truthy(undefinedResult.stack);
+
+	// Null
+	const nullResult = serializeError(null);
+	t.is(nullResult.name, 'NonError');
+	t.regex(nullResult.message, /^Non-error value:/);
+	t.truthy(nullResult.stack);
 });
 
-test('should serialize null to NonError', t => {
-	const serialized = serializeError(null);
-	t.is(serialized.name, 'NonError');
-	t.regex(serialized.message, /^Non-error value:/);
-	t.truthy(serialized.stack);
-});
-
-test('should deserialize null', t => {
-	deserializeNonError(t, null);
-});
-
-test('should deserialize number', t => {
-	deserializeNonError(t, 1);
-});
-
-test('should deserialize boolean', t => {
-	deserializeNonError(t, true);
-});
-
-test('should deserialize string', t => {
-	deserializeNonError(t, '123');
-});
-
-test('should deserialize array', t => {
-	deserializeNonError(t, [1]);
-});
-
-test('should deserialize empty object', t => {
-	deserializeNonError(t, {});
+test('should deserialize non-error values to NonError', t => {
+	const testValues = [null, 1, true, '123', [1], {}];
+	for (const value of testValues) {
+		deserializeNonError(t, value);
+	}
 });
 
 test('should ignore Error instance', t => {
@@ -285,14 +266,14 @@ for (const [name, CustomError] of errorConstructors) {
 test('should not allow adding incompatible or redundant error constructors', t => {
 	t.throws(() => {
 		addKnownErrorConstructor(Error);
-	}, {message: 'The error constructor "Error" is already known.'});
+	}, {message: 'Error constructor "Error" is already known'});
 	t.throws(() => {
 		addKnownErrorConstructor(class BadError {
 			constructor() {
 				throw new Error('The number you have dialed is not in service');
 			}
 		});
-	}, {message: 'The error constructor "BadError" is not compatible'});
+	}, {message: 'Constructor "BadError" is not compatible'});
 });
 
 test('should handle minified constructors correctly using instance name', t => {
@@ -319,6 +300,188 @@ test('should handle minified constructors correctly using instance name', t => {
 	t.true(deserialized instanceof CustomError);
 	t.is(deserialized.name, 'CustomError');
 	t.is(deserialized.message, 'test message');
+});
+
+test('should support factory functions for incompatible constructors', t => {
+	class SpecialError extends Error {
+		constructor(message, options = {}) {
+			super(message);
+			this.name = 'SpecialError';
+			this.code = options.code || 'UNKNOWN';
+			this.severity = options.severity || 'low';
+		}
+	}
+
+	addKnownErrorConstructor(SpecialError, () => new SpecialError('', {code: 'DEFAULT', severity: 'high'}));
+
+	const original = new SpecialError('Something went wrong', {code: 'CUSTOM', severity: 'critical'});
+	const serialized = serializeError(original);
+
+	const deserialized = deserializeError(serialized);
+
+	t.true(deserialized instanceof SpecialError);
+	t.is(deserialized.name, 'SpecialError');
+	t.is(deserialized.message, 'Something went wrong');
+	t.is(deserialized.code, 'CUSTOM');
+	t.is(deserialized.severity, 'critical');
+});
+
+test('should validate factory functions', t => {
+	class MyError extends Error {
+		constructor() {
+			super();
+			this.name = 'MyError';
+		}
+	}
+
+	class OtherError extends Error {
+		constructor() {
+			super();
+			this.name = 'OtherError';
+		}
+	}
+
+	t.throws(() => {
+		addKnownErrorConstructor(MyError, () => {
+			throw new Error('Factory failed');
+		});
+	}, {message: 'Factory is not compatible'});
+
+	t.throws(() => {
+		addKnownErrorConstructor(MyError, () => new OtherError());
+	}, {message: /must return an instance of/});
+});
+
+test('should validate factory parameter types', t => {
+	class TestError extends Error {
+		constructor() {
+			super();
+			this.name = 'TestError';
+		}
+	}
+
+	const invalidFactories = ['not a function', 42, {}];
+	for (const invalidFactory of invalidFactories) {
+		t.throws(() => {
+			addKnownErrorConstructor(TestError, invalidFactory);
+		}, {message: /must be a function/});
+	}
+});
+
+test('should validate error instance names', t => {
+	class NoNameError extends Error {
+		constructor() {
+			super();
+			this.name = undefined; // Explicitly set to undefined
+		}
+	}
+
+	t.throws(() => {
+		addKnownErrorConstructor(NoNameError);
+	}, {message: /must have a non-empty string "name" property/});
+
+	class EmptyNameError extends Error {
+		constructor() {
+			super();
+			this.name = '';
+		}
+	}
+
+	t.throws(() => {
+		addKnownErrorConstructor(EmptyNameError);
+	}, {message: /must have a non-empty string "name" property/});
+
+	class NumberNameError extends Error {
+		constructor() {
+			super();
+			this.name = 42;
+		}
+	}
+
+	t.throws(() => {
+		addKnownErrorConstructor(NumberNameError);
+	}, {message: /must have a non-empty string "name" property/});
+});
+
+test('should handle factory errors during deserialization gracefully', t => {
+	let shouldThrow = false;
+
+	class UnreliableError extends Error {
+		constructor() {
+			super();
+			this.name = 'UnreliableError';
+		}
+	}
+
+	addKnownErrorConstructor(UnreliableError, () => {
+		if (shouldThrow) {
+			throw new Error('Factory failure during deserialization');
+		}
+
+		return new UnreliableError();
+	});
+
+	shouldThrow = false;
+	const deserialized1 = deserializeError({
+		name: 'UnreliableError',
+		message: 'test1',
+	});
+	t.true(deserialized1 instanceof UnreliableError);
+
+	shouldThrow = true;
+	const deserialized2 = deserializeError({
+		name: 'UnreliableError',
+		message: 'test2',
+	});
+	t.true(deserialized2 instanceof UnreliableError);
+	t.is(deserialized2.message, 'test2');
+});
+
+test('should provide helpful error messages', t => {
+	class TestError extends Error {
+		constructor() {
+			super();
+			this.name = 'TestError';
+		}
+	}
+
+	addKnownErrorConstructor(TestError);
+
+	t.throws(() => {
+		addKnownErrorConstructor(TestError);
+	}, {message: /TestError.*already known/});
+});
+
+test('should handle minified constructor names in error messages', t => {
+	class MinifiedError extends Error {
+		constructor() {
+			super();
+			this.name = 'MinifiedErrorUnique';
+		}
+	}
+
+	Object.defineProperty(MinifiedError, 'name', {
+		value: 'a',
+		configurable: true,
+	});
+
+	addKnownErrorConstructor(MinifiedError);
+
+	class AnotherMinifiedError extends Error {
+		constructor() {
+			super();
+			this.name = 'MinifiedErrorUnique'; // Same resolved name
+		}
+	}
+
+	Object.defineProperty(AnotherMinifiedError, 'name', {
+		value: 'b',
+		configurable: true,
+	});
+
+	t.throws(() => {
+		addKnownErrorConstructor(AnotherMinifiedError);
+	}, {message: 'Error constructor "MinifiedErrorUnique" is already known'});
 });
 
 test('should deserialize plain object', t => {

@@ -1,6 +1,6 @@
 import {type Primitive, type JsonObject} from 'type-fest';
 
-export {addKnownErrorConstructor} from './error-constructors.js';
+export {addKnownErrorConstructor, type ErrorFactory} from './error-constructors.js';
 
 export type ErrorObject = {
 	name?: string;
@@ -33,10 +33,10 @@ export type Options = {
 	error.one = {two: {three: {}}};
 
 	console.log(serializeError(error, {maxDepth: 1}));
-	//=> {name: 'Error', message: '…', one: {}}
+	//=> {name: 'Error', message: '🦄', one: {}}
 
 	console.log(serializeError(error, {maxDepth: 2}));
-	//=> {name: 'Error', message: '…', one: { two: {}}}
+	//=> {name: 'Error', message: '🦄', one: { two: {}}}
 	```
 	*/
 	readonly maxDepth?: number;

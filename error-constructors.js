@@ -22,19 +22,49 @@ const list = [
 	.map(constructor => [constructor.name, constructor]);
 
 export const errorConstructors = new Map(list);
+export const errorFactories = new Map();
 
-export function addKnownErrorConstructor(constructor) {
+export function addKnownErrorConstructor(constructor, factory) {
 	let instance;
-	try {
-		instance = new constructor();
-	} catch (error) {
-		throw new Error(`The error constructor "${constructor.name}" is not compatible`, {cause: error});
+	let resolvedName;
+
+	if (factory) {
+		if (typeof factory !== 'function') {
+			throw new TypeError('Factory must be a function');
+		}
+
+		// Verify factory can execute without throwing
+		try {
+			instance = factory();
+		} catch (error) {
+			throw new Error('Factory is not compatible', {cause: error});
+		}
+
+		if (!(instance instanceof constructor)) {
+			throw new TypeError('Factory must return an instance of the constructor');
+		}
+
+		resolvedName = instance.name;
+	} else {
+		try {
+			instance = new constructor();
+		} catch (error) {
+			throw new Error(`Constructor "${constructor.name}" is not compatible`, {cause: error});
+		}
+
+		resolvedName = instance.name;
 	}
 
-	const {name} = instance;
-	if (errorConstructors.has(name)) {
-		throw new Error(`The error constructor "${name}" is already known.`);
+	if (!resolvedName || typeof resolvedName !== 'string') {
+		throw new TypeError('Error instances must have a non-empty string "name" property');
 	}
 
-	errorConstructors.set(name, constructor);
+	if (errorConstructors.has(resolvedName)) {
+		throw new Error(`Error constructor "${resolvedName}" is already known`);
+	}
+
+	errorConstructors.set(resolvedName, constructor);
+	if (factory) {
+		errorFactories.set(resolvedName, factory);
+	}
 }

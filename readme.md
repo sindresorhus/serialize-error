@@ -64,7 +64,22 @@ import {MyCustomError} from './errors.js'
 addKnownErrorConstructor(MyCustomError);
 ```
 
-**Warning:** The constructor must work without any arguments or this function will throw.
+For error constructors that require arguments, you can provide a factory function:
+
+```js
+import {addKnownErrorConstructor} from 'serialize-error';
+
+class CustomError extends Error {
+	constructor(message, options = {}) {
+		super(message);
+		this.name = 'CustomError';
+		this.code = options.code ?? 'UNKNOWN';
+	}
+}
+
+// Use a factory function to provide default arguments
+addKnownErrorConstructor(CustomError, () => new CustomError('', {code: 'ERR_UNICORN'}));
+```
 
 ## API
 
@@ -99,8 +114,8 @@ class ErrorWithDate extends Error {
 
 const error = new ErrorWithDate();
 
-serializeError(error);
-// => {date: '1970-01-01T00:00:00.000Z', name, message, stack}
+console.log(serializeError(error));
+//=> {date: '1970-01-01T00:00:00.000Z', name, message, stack}
 ```
 
 ```js
