@@ -295,6 +295,32 @@ test('should not allow adding incompatible or redundant error constructors', t =
 	}, {message: 'The error constructor "BadError" is not compatible'});
 });
 
+test('should handle minified constructors correctly using instance name', t => {
+	class CustomError extends Error {
+		constructor(message) {
+			super(message);
+			this.name = 'CustomError';
+		}
+	}
+
+	// Simulate minification by changing constructor name
+	Object.defineProperty(CustomError, 'name', {
+		value: 'a', // Minified name
+		configurable: true,
+	});
+
+	addKnownErrorConstructor(CustomError);
+
+	const error = new CustomError('test message');
+	const serialized = serializeError(error);
+	t.is(serialized.name, 'CustomError');
+
+	const deserialized = deserializeError(serialized);
+	t.true(deserialized instanceof CustomError);
+	t.is(deserialized.name, 'CustomError');
+	t.is(deserialized.message, 'test message');
+});
+
 test('should deserialize plain object', t => {
 	const object = {
 		message: 'error message',

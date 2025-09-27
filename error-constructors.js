@@ -26,16 +26,16 @@ const list = [
 export const errorConstructors = new Map(list);
 
 export function addKnownErrorConstructor(constructor) {
-	const {name} = constructor;
-	if (errorConstructors.has(name)) {
-		throw new Error(`The error constructor "${name}" is already known.`);
+	let instance;
+	try {
+		instance = new constructor();
+	} catch (error) {
+		throw new Error(`The error constructor "${constructor.name}" is not compatible`, {cause: error});
 	}
 
-	try {
-		// eslint-disable-next-line no-new -- It just needs to be verified
-		new constructor();
-	} catch (error) {
-		throw new Error(`The error constructor "${name}" is not compatible`, {cause: error});
+	const {name} = instance;
+	if (errorConstructors.has(name)) {
+		throw new Error(`The error constructor "${name}" is already known.`);
 	}
 
 	errorConstructors.set(name, constructor);
