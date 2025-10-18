@@ -1,25 +1,5 @@
+import NonError from 'non-error';
 import {errorConstructors} from './error-constructors.js';
-
-export class NonError extends Error {
-	name = 'NonError';
-
-	constructor(message) {
-		super(NonError._prepareSuperMessage(message));
-	}
-
-	static _prepareSuperMessage(message) {
-		// Handle BigInt specially to show the 'n' suffix
-		if (typeof message === 'bigint') {
-			return `${message}n`;
-		}
-
-		try {
-			return JSON.stringify(message) ?? String(message);
-		} catch {
-			return String(message);
-		}
-	}
-}
 
 const errorProperties = [
 	{
@@ -64,7 +44,6 @@ const newError = name => {
 		: new ErrorConstructor();
 };
 
-// eslint-disable-next-line complexity
 const destroyCircular = ({
 	from,
 	seen,
@@ -111,7 +90,6 @@ const destroyCircular = ({
 			continue;
 		}
 
-		// TODO: Use `stream.isReadable()` when targeting Node.js 18.
 		if (value !== null && typeof value === 'object' && typeof value.pipe === 'function') {
 			to[key] = serialize ? '[object Stream]' : value;
 			continue;
@@ -219,18 +197,19 @@ export function deserializeError(value, options = {}) {
 
 export function isErrorLike(value) {
 	return Boolean(value)
-	&& typeof value === 'object'
-	&& typeof value.name === 'string'
-	&& typeof value.message === 'string'
-	&& typeof value.stack === 'string';
+		&& typeof value === 'object'
+		&& typeof value.name === 'string'
+		&& typeof value.message === 'string'
+		&& typeof value.stack === 'string';
 }
 
 // Used as a weak check for immediately-passed objects, whereas `isErrorLike` is used for nested values to avoid bad detection
 function isMinimumViableSerializedError(value) {
 	return Boolean(value)
-	&& typeof value === 'object'
-	&& typeof value.message === 'string'
-	&& !Array.isArray(value);
+		&& typeof value === 'object'
+		&& typeof value.message === 'string'
+		&& !Array.isArray(value);
 }
 
 export {addKnownErrorConstructor} from './error-constructors.js';
+export {default as NonError} from 'non-error';

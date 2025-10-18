@@ -13,7 +13,7 @@ function deserializeNonError(t, value) {
 	const deserialized = deserializeError(value);
 	t.true(deserialized instanceof Error);
 	t.is(deserialized.constructor.name, 'NonError');
-	t.is(deserialized.message, JSON.stringify(value));
+	t.regex(deserialized.message, /^Non-error value:/);
 }
 
 test('main', t => {
@@ -173,7 +173,7 @@ test('should serialize AggregateError', t => {
 test('should serialize undefined to NonError', t => {
 	const serialized = serializeError(undefined);
 	t.is(serialized.name, 'NonError');
-	t.is(serialized.message, 'undefined');
+	t.regex(serialized.message, /^Non-error value:/);
 	t.truthy(serialized.stack);
 });
 
@@ -181,44 +181,44 @@ test('should serialize values to NonError', t => {
 	// String
 	const stringResult = serializeError('hello');
 	t.is(stringResult.name, 'NonError');
-	t.is(stringResult.message, '"hello"');
+	t.regex(stringResult.message, /^Non-error value:/);
 	t.truthy(stringResult.stack);
 
 	// Number
 	const numberResult = serializeError(42);
 	t.is(numberResult.name, 'NonError');
-	t.is(numberResult.message, '42');
+	t.regex(numberResult.message, /^Non-error value:/);
 	t.truthy(numberResult.stack);
 
 	// Boolean
 	const booleanResult = serializeError(true);
 	t.is(booleanResult.name, 'NonError');
-	t.is(booleanResult.message, 'true');
+	t.regex(booleanResult.message, /^Non-error value:/);
 	t.truthy(booleanResult.stack);
 
 	// Symbol
 	const symbolResult = serializeError(Symbol('test'));
 	t.is(symbolResult.name, 'NonError');
-	t.is(symbolResult.message, 'Symbol(test)');
+	t.regex(symbolResult.message, /^Non-error value:/);
 	t.truthy(symbolResult.stack);
 
 	// BigInt
 	const bigIntResult = serializeError(BigInt(123));
 	t.is(bigIntResult.name, 'NonError');
-	t.is(bigIntResult.message, '123n');
+	t.regex(bigIntResult.message, /^Non-error value:/);
 	t.truthy(bigIntResult.stack);
 
 	// Function
 	const functionResult = serializeError(() => {});
 	t.is(functionResult.name, 'NonError');
-	t.is(functionResult.message, '"<Function>"');
+	t.regex(functionResult.message, /^Non-error value:/);
 	t.truthy(functionResult.stack);
 });
 
 test('should serialize null to NonError', t => {
 	const serialized = serializeError(null);
 	t.is(serialized.name, 'NonError');
-	t.is(serialized.message, 'null');
+	t.regex(serialized.message, /^Non-error value:/);
 	t.truthy(serialized.stack);
 });
 
