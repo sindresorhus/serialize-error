@@ -278,9 +278,10 @@ test('should not allow adding incompatible or redundant error constructors', t =
 
 test('should handle minified constructors correctly using instance name', t => {
 	class CustomError extends Error {
-		constructor(message) {
+		name = 'CustomError';
+
+		constructor(message) { // eslint-disable-line no-useless-constructor
 			super(message);
-			this.name = 'CustomError';
 		}
 	}
 
@@ -304,9 +305,10 @@ test('should handle minified constructors correctly using instance name', t => {
 
 test('should support factory functions for incompatible constructors', t => {
 	class SpecialError extends Error {
+		name = 'SpecialError';
+
 		constructor(message, options = {}) {
 			super(message);
-			this.name = 'SpecialError';
 			this.code = options.code || 'UNKNOWN';
 			this.severity = options.severity || 'low';
 		}
@@ -328,17 +330,11 @@ test('should support factory functions for incompatible constructors', t => {
 
 test('should validate factory functions', t => {
 	class MyError extends Error {
-		constructor() {
-			super();
-			this.name = 'MyError';
-		}
+		name = 'MyError';
 	}
 
 	class OtherError extends Error {
-		constructor() {
-			super();
-			this.name = 'OtherError';
-		}
+		name = 'OtherError';
 	}
 
 	t.throws(() => {
@@ -354,10 +350,7 @@ test('should validate factory functions', t => {
 
 test('should validate factory parameter types', t => {
 	class TestError extends Error {
-		constructor() {
-			super();
-			this.name = 'TestError';
-		}
+		name = 'TestError';
 	}
 
 	const invalidFactories = ['not a function', 42, {}];
@@ -370,10 +363,7 @@ test('should validate factory parameter types', t => {
 
 test('should validate error instance names', t => {
 	class NoNameError extends Error {
-		constructor() {
-			super();
-			this.name = undefined; // Explicitly set to undefined
-		}
+		name = undefined; // Explicitly set to undefined
 	}
 
 	t.throws(() => {
@@ -381,10 +371,7 @@ test('should validate error instance names', t => {
 	}, {message: /must have a non-empty string "name" property/});
 
 	class EmptyNameError extends Error {
-		constructor() {
-			super();
-			this.name = '';
-		}
+		name = '';
 	}
 
 	t.throws(() => {
@@ -392,10 +379,7 @@ test('should validate error instance names', t => {
 	}, {message: /must have a non-empty string "name" property/});
 
 	class NumberNameError extends Error {
-		constructor() {
-			super();
-			this.name = 42;
-		}
+		name = 42;
 	}
 
 	t.throws(() => {
@@ -403,46 +387,33 @@ test('should validate error instance names', t => {
 	}, {message: /must have a non-empty string "name" property/});
 });
 
-test('should handle factory errors during deserialization gracefully', t => {
-	let shouldThrow = false;
+test('should throw when factory fails during deserialization', t => {
+	let callCount = 0;
 
 	class UnreliableError extends Error {
-		constructor() {
-			super();
-			this.name = 'UnreliableError';
-		}
+		name = 'UnreliableError';
 	}
 
 	addKnownErrorConstructor(UnreliableError, () => {
-		if (shouldThrow) {
+		callCount++;
+		if (callCount > 1) {
 			throw new Error('Factory failure during deserialization');
 		}
 
 		return new UnreliableError();
 	});
 
-	shouldThrow = false;
-	const deserialized1 = deserializeError({
-		name: 'UnreliableError',
-		message: 'test1',
-	});
-	t.true(deserialized1 instanceof UnreliableError);
-
-	shouldThrow = true;
-	const deserialized2 = deserializeError({
-		name: 'UnreliableError',
-		message: 'test2',
-	});
-	t.true(deserialized2 instanceof UnreliableError);
-	t.is(deserialized2.message, 'test2');
+	t.throws(() => {
+		deserializeError({
+			name: 'UnreliableError',
+			message: 'test',
+		});
+	}, {message: 'Factory failure during deserialization'});
 });
 
 test('should provide helpful error messages', t => {
 	class TestError extends Error {
-		constructor() {
-			super();
-			this.name = 'TestError';
-		}
+		name = 'TestError';
 	}
 
 	addKnownErrorConstructor(TestError);
@@ -454,10 +425,7 @@ test('should provide helpful error messages', t => {
 
 test('should handle minified constructor names in error messages', t => {
 	class MinifiedError extends Error {
-		constructor() {
-			super();
-			this.name = 'MinifiedErrorUnique';
-		}
+		name = 'MinifiedErrorUnique';
 	}
 
 	Object.defineProperty(MinifiedError, 'name', {
@@ -468,10 +436,7 @@ test('should handle minified constructor names in error messages', t => {
 	addKnownErrorConstructor(MinifiedError);
 
 	class AnotherMinifiedError extends Error {
-		constructor() {
-			super();
-			this.name = 'MinifiedErrorUnique'; // Same resolved name
-		}
+		name = 'MinifiedErrorUnique'; // Same resolved name
 	}
 
 	Object.defineProperty(AnotherMinifiedError, 'name', {

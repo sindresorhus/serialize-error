@@ -70,14 +70,14 @@ For error constructors that require arguments, you can provide a factory functio
 import {addKnownErrorConstructor} from 'serialize-error';
 
 class CustomError extends Error {
-	constructor(message, options = {}) {
+	name = 'CustomError';
+
+	constructor(message, options) {
 		super(message);
-		this.name = 'CustomError';
-		this.code = options.code ?? 'UNKNOWN';
+		this.code = options.code;
 	}
 }
 
-// Use a factory function to provide default arguments
 addKnownErrorConstructor(CustomError, () => new CustomError('', {code: 'ERR_UNICORN'}));
 ```
 
