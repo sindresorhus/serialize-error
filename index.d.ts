@@ -1,6 +1,7 @@
-import {type Primitive, type JsonObject} from 'type-fest';
+import {type JsonObject} from 'type-fest';
 
 export {addKnownErrorConstructor, type ErrorFactory} from './error-constructors.js';
+export {default as NonError} from 'non-error';
 
 export type ErrorObject = {
 	name?: string;

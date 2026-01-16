@@ -3,6 +3,7 @@ import {
 	serializeError,
 	deserializeError,
 	addKnownErrorConstructor,
+	NonError,
 	type ErrorObject,
 	type Options,
 } from './index.js';
@@ -31,3 +32,6 @@ addKnownErrorConstructor(Error);
 
 class CustomError extends Error {}
 addKnownErrorConstructor(CustomError);
+
+expectTypeOf(new NonError('test')).toEqualTypeOf<NonError>();
+expectTypeOf(NonError.isNonError(new NonError('test'))).toEqualTypeOf<boolean>();

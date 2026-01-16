@@ -89,6 +89,14 @@ test('should discard buffers', t => {
 	t.deepEqual(serialized, {a: '[object Buffer]'});
 });
 
+test('should serialize BigInt as string', t => {
+	const error = new Error('test');
+	error.bigNumber = 123_456_789_012_345_678_901n;
+	const serialized = serializeError(error);
+	t.is(serialized.bigNumber, '123456789012345678901n');
+	t.notThrows(() => JSON.stringify(serialized));
+});
+
 test('should discard streams', t => {
 	t.deepEqual(serializeError({s: new Stream.Stream()}), {s: '[object Stream]'}, 'Stream.Stream');
 	t.deepEqual(serializeError({s: new Stream.Readable()}), {s: '[object Stream]'}, 'Stream.Readable');
@@ -782,6 +790,28 @@ test('should serialize properties up to `Options.maxDepth` levels deep', t => {
 	t.deepEqual(levelThree, {
 		message, name, stack, one: {two: {three: {}}},
 	});
+});
+
+test('should handle maxDepth consistently across sibling properties', t => {
+	const error = new Error('test');
+	error.a = {deep: {value: 'a'}};
+	error.b = {deep: {value: 'b'}};
+	error.c = {deep: {value: 'c'}};
+
+	const serialized = serializeError(error, {maxDepth: 3});
+	t.is(serialized.a.deep.value, 'a');
+	t.is(serialized.b.deep.value, 'b');
+	t.is(serialized.c.deep.value, 'c');
+
+	const deserialized = deserializeError({
+		message: 'test',
+		a: {deep: {value: 'a'}},
+		b: {deep: {value: 'b'}},
+		c: {deep: {value: 'c'}},
+	}, {maxDepth: 3});
+	t.is(deserialized.a.deep.value, 'a');
+	t.is(deserialized.b.deep.value, 'b');
+	t.is(deserialized.c.deep.value, 'c');
 });
 
 test('should identify serialized errors', t => {

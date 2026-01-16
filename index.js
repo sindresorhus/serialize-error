@@ -84,7 +84,7 @@ const destroyCircular = ({
 		seen: [...seen],
 		forceEnumerable,
 		maxDepth,
-		depth,
+		depth: depth + 1,
 		useToJSON,
 		serialize,
 	});
@@ -108,6 +108,11 @@ const destroyCircular = ({
 			continue;
 		}
 
+		if (serialize && typeof value === 'bigint') {
+			to[key] = `${value}n`;
+			continue;
+		}
+
 		if (!value || typeof value !== 'object') {
 			// Gracefully handle non-configurable errors like `DOMException`.
 			try {
@@ -117,10 +122,8 @@ const destroyCircular = ({
 			continue;
 		}
 
-		if (!seen.includes(from[key])) {
-			depth++;
-			to[key] = continueDestroyCircular(from[key]);
-
+		if (!seen.includes(value)) {
+			to[key] = continueDestroyCircular(value);
 			continue;
 		}
 
