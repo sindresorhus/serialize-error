@@ -38,6 +38,10 @@ const toJSON = from => {
 };
 
 const newError = name => {
+	if (name === 'NonError') {
+		return new NonError();
+	}
+
 	const factory = errorFactories.get(name);
 	if (factory) {
 		return factory();
@@ -133,6 +137,11 @@ const destroyCircular = ({
 	if (serialize || to instanceof Error) {
 		for (const {property, enumerable} of errorProperties) {
 			if (from[property] !== undefined && from[property] !== null) {
+				const descriptor = Object.getOwnPropertyDescriptor(to, property);
+				if (descriptor?.configurable === false) {
+					continue;
+				}
+
 				Object.defineProperty(to, property, {
 					value: isErrorLike(from[property]) || Array.isArray(from[property])
 						? continueDestroyCircular(from[property])

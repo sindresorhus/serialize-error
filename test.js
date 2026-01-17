@@ -235,6 +235,16 @@ test('should deserialize non-error values to NonError', t => {
 	}
 });
 
+test('should round-trip serialized non-errors to NonError', t => {
+	const serialized = serializeError('hello');
+	const deserialized = deserializeError(serialized);
+
+	t.true(deserialized instanceof NonError);
+	t.is(deserialized.name, 'NonError');
+	t.regex(deserialized.message, /^Non-error value:/);
+	t.truthy(deserialized.stack);
+});
+
 test('should ignore Error instance', t => {
 	const originalError = new Error('test');
 	const deserialized = deserializeError(originalError);
