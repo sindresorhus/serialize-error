@@ -152,11 +152,9 @@ const destroyCircular = ({
 
 			let processedValue = value;
 			if (typeof value === 'object') {
-				if (seen.has(value)) {
-					processedValue = '[Circular]';
-				} else if (isErrorLike(value) || Array.isArray(value)) {
-					processedValue = continueDestroyCircular(value);
-				}
+				processedValue = seen.has(value)
+					? '[Circular]'
+					: continueDestroyCircular(value);
 			}
 
 			Object.defineProperty(to, property, {

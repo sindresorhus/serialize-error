@@ -173,6 +173,24 @@ test('should handle circular cause property', t => {
 	t.is(serialized.cause, '[Circular]');
 });
 
+test('should handle circular errors property', t => {
+	const error = new AggregateError([], 'test');
+	error.errors.push(error);
+
+	const serialized = serializeError(error);
+	t.is(serialized.errors[0], '[Circular]');
+});
+
+test('should handle plain object cause with circular reference', t => {
+	const circular = {};
+	circular.self = circular;
+	const error = new Error('test');
+	error.cause = circular;
+
+	const serialized = serializeError(error);
+	t.is(serialized.cause.self, '[Circular]');
+});
+
 test('should serialize AggregateError', t => {
 	// eslint-disable-next-line unicorn/error-message -- Testing this eventuality
 	const error = new AggregateError([new Error('inner error')]);
