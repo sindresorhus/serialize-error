@@ -164,6 +164,15 @@ test('should serialize the cause property', t => {
 	t.false(serialized.cause.cause instanceof Error);
 });
 
+test('should handle circular cause property', t => {
+	const error = new Error('test');
+	error.cause = error;
+
+	const serialized = serializeError(error);
+	t.is(serialized.message, 'test');
+	t.is(serialized.cause, '[Circular]');
+});
+
 test('should serialize AggregateError', t => {
 	// eslint-disable-next-line unicorn/error-message -- Testing this eventuality
 	const error = new AggregateError([new Error('inner error')]);

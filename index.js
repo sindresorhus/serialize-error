@@ -73,19 +73,21 @@ const destroyCircular = ({
 		}
 	}
 
-	seen.push(from);
+	seen.add(from);
 
 	if (depth >= maxDepth) {
+		seen.delete(from);
 		return to;
 	}
 
 	if (useToJSON && typeof from.toJSON === 'function' && !toJsonWasCalled.has(from)) {
+		seen.delete(from);
 		return toJSON(from);
 	}
 
 	const continueDestroyCircular = value => destroyCircular({
 		from: value,
-		seen: [...seen],
+		seen,
 		forceEnumerable,
 		maxDepth,
 		depth: depth + 1,
@@ -93,7 +95,9 @@ const destroyCircular = ({
 		serialize,
 	});
 
-	for (const [key, value] of Object.entries(from)) {
+	for (const key of Object.keys(from)) {
+		const value = from[key];
+
 		if (value && value instanceof Uint8Array && value.constructor.name === 'Buffer') {
 			to[key] = serialize ? '[object Buffer]' : value;
 			continue;
@@ -126,7 +130,7 @@ const destroyCircular = ({
 			continue;
 		}
 
-		if (!seen.includes(value)) {
+		if (!seen.has(value)) {
 			to[key] = continueDestroyCircular(value);
 			continue;
 		}
@@ -136,24 +140,35 @@ const destroyCircular = ({
 
 	if (serialize || to instanceof Error) {
 		for (const {property, enumerable} of errorProperties) {
-			if (from[property] !== undefined && from[property] !== null) {
-				const descriptor = Object.getOwnPropertyDescriptor(to, property);
-				if (descriptor?.configurable === false) {
-					continue;
-				}
-
-				Object.defineProperty(to, property, {
-					value: isErrorLike(from[property]) || Array.isArray(from[property])
-						? continueDestroyCircular(from[property])
-						: from[property],
-					enumerable: forceEnumerable ? true : enumerable,
-					configurable: true,
-					writable: true,
-				});
+			const value = from[property];
+			if (value === undefined || value === null) {
+				continue;
 			}
+
+			const descriptor = Object.getOwnPropertyDescriptor(to, property);
+			if (descriptor?.configurable === false) {
+				continue;
+			}
+
+			let processedValue = value;
+			if (typeof value === 'object') {
+				if (seen.has(value)) {
+					processedValue = '[Circular]';
+				} else if (isErrorLike(value) || Array.isArray(value)) {
+					processedValue = continueDestroyCircular(value);
+				}
+			}
+
+			Object.defineProperty(to, property, {
+				value: processedValue,
+				enumerable: forceEnumerable || enumerable,
+				configurable: true,
+				writable: true,
+			});
 		}
 	}
 
+	seen.delete(from);
 	return to;
 };
 
@@ -166,7 +181,7 @@ export function serializeError(value, options = {}) {
 	if (typeof value === 'object' && value !== null) {
 		return destroyCircular({
 			from: value,
-			seen: [],
+			seen: new Set(),
 			forceEnumerable: true,
 			maxDepth,
 			depth: 0,
@@ -182,7 +197,7 @@ export function serializeError(value, options = {}) {
 
 	return destroyCircular({
 		from: new NonError(value),
-		seen: [],
+		seen: new Set(),
 		forceEnumerable: true,
 		maxDepth,
 		depth: 0,
@@ -201,7 +216,7 @@ export function deserializeError(value, options = {}) {
 	if (isMinimumViableSerializedError(value)) {
 		return destroyCircular({
 			from: value,
-			seen: [],
+			seen: new Set(),
 			to: newError(value.name),
 			maxDepth,
 			depth: 0,
