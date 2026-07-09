@@ -145,6 +145,7 @@ Deserialize a plain object or any value into an `Error` object.
 - Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
 - Circular references are handled.
 - [Native error constructors](./error-constructors.js) are preserved (TypeError, DOMException, etc) and [more can be added.](#error-constructors)
+- The deserialized error can be wrapped as the `cause` of a new error to capture the current stack.
 
 ### value
 
@@ -180,6 +181,22 @@ Type: `boolean`\
 Default: `true`
 
 Indicate whether to use a `.toJSON()` method if encountered in the object. This is useful when a custom error implements [its own serialization logic via `.toJSON()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#tojson_behavior) but you prefer to not use it.
+
+#### wrap
+
+Type: `boolean`\
+Default: `false`
+
+Wrap the deserialized error in a new error with the deserialized error set as its `cause`. This is useful when you want to throw a deserialized error while keeping a stack trace from the current call site.
+
+```js
+import {deserializeError} from 'serialize-error';
+
+const error = deserializeError(serializedError, {wrap: true});
+
+console.log(error.cause);
+//=> [Error: Original error]
+```
 
 ### isErrorLike(value)
 
