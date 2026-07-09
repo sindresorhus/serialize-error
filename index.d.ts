@@ -48,6 +48,17 @@ export type Options = {
 	@default true
 	*/
 	readonly useToJSON?: boolean;
+
+	/**
+	Wrap the deserialized error as the `cause` of a new error, capturing the current stack while preserving the original deserialized error.
+
+	This is useful when you want to throw a deserialized error but keep a stack trace pointing to the current call site.
+
+	Only applies to `deserializeError`.
+
+	@default false
+	*/
+	readonly asCause?: boolean;
 };
 
 /**
@@ -121,6 +132,7 @@ Deserialize a plain object or any value into an `Error` object.
 - Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
 - Circular references are handled.
 - Native error constructors are preserved (TypeError, DOMException, etc) and more can be added.
+- The deserialized error can be wrapped as the `cause` of a new error to capture the current stack.
 
 @example
 ```

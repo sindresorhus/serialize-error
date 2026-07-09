@@ -53,6 +53,28 @@ const newError = name => {
 		: new ErrorConstructor();
 };
 
+const wrapAsCause = (error, stackStartFunction) => {
+	const wrappedError = newError(error.name);
+
+	for (const property of ['name', 'message', 'cause']) {
+		const value = property === 'cause' ? error : error[property];
+		if (value === undefined || value === null) {
+			continue;
+		}
+
+		Object.defineProperty(wrappedError, property, {
+			value,
+			enumerable: false,
+			configurable: true,
+			writable: true,
+		});
+	}
+
+	Error.captureStackTrace?.(wrappedError, stackStartFunction);
+
+	return wrappedError;
+};
+
 const destroyCircular = ({
 	from,
 	seen,
@@ -205,14 +227,18 @@ export function serializeError(value, options = {}) {
 }
 
 export function deserializeError(value, options = {}) {
-	const {maxDepth = Number.POSITIVE_INFINITY} = options;
+	const {
+		maxDepth = Number.POSITIVE_INFINITY,
+		asCause = false,
+	} = options;
 
 	if (value instanceof Error) {
-		return value;
+		return asCause ? wrapAsCause(value, deserializeError) : value;
 	}
 
+	let deserializedError;
 	if (isMinimumViableSerializedError(value)) {
-		return destroyCircular({
+		deserializedError = destroyCircular({
 			from: value,
 			seen: new Set(),
 			to: newError(value.name),
@@ -220,9 +246,11 @@ export function deserializeError(value, options = {}) {
 			depth: 0,
 			serialize: false,
 		});
+	} else {
+		deserializedError = new NonError(value);
 	}
 
-	return new NonError(value);
+	return asCause ? wrapAsCause(deserializedError, deserializeError) : deserializedError;
 }
 
 export function isErrorLike(value) {

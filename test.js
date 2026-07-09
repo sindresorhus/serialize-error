@@ -510,6 +510,58 @@ test('should deserialize plain object', t => {
 	t.is(deserialized.code, 'code');
 });
 
+test('should wrap deserialized errors as cause with a current stack', t => {
+	const deserialized = deserializeError({
+		name: 'TypeError',
+		message: 'error message',
+		stack: 'serialized stack',
+		code: 'code',
+	}, {asCause: true});
+
+	t.true(deserialized instanceof TypeError);
+	t.is(deserialized.name, 'TypeError');
+	t.is(deserialized.message, 'error message');
+	t.is(deserialized.code, undefined);
+	t.true(deserialized.cause instanceof TypeError);
+	t.is(deserialized.cause.message, 'error message');
+	t.is(deserialized.cause.stack, 'serialized stack');
+	t.is(deserialized.cause.code, 'code');
+	t.false(Object.keys(deserialized).includes('cause'));
+	t.not(deserialized.stack, 'serialized stack');
+	t.regex(deserialized.stack, /test\.js/);
+	t.false(deserialized.stack.includes('wrapAsCause'));
+});
+
+test('should wrap deserialized errors with custom constructors', t => {
+	class WrappedCustomError extends Error {
+		name = 'WrappedCustomError';
+	}
+
+	addKnownErrorConstructor(WrappedCustomError);
+
+	const deserialized = deserializeError({
+		name: 'WrappedCustomError',
+		message: 'custom error message',
+		stack: 'serialized custom stack',
+	}, {asCause: true});
+
+	t.true(deserialized instanceof WrappedCustomError);
+	t.is(deserialized.message, 'custom error message');
+	t.true(deserialized.cause instanceof WrappedCustomError);
+	t.is(deserialized.cause.message, 'custom error message');
+	t.is(deserialized.cause.stack, 'serialized custom stack');
+});
+
+test('should wrap existing Error instances when requested', t => {
+	const error = new RangeError('existing error');
+	const deserialized = deserializeError(error, {asCause: true});
+
+	t.true(deserialized instanceof RangeError);
+	t.is(deserialized.message, 'existing error');
+	t.is(deserialized.cause, error);
+	t.not(deserialized, error);
+});
+
 test('should preserve buffers when deserializing', t => {
 	const buffer = Buffer.from([1, 2, 3]);
 	const deserialized = deserializeError({
