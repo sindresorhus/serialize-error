@@ -562,6 +562,27 @@ test('should wrap existing Error instances when requested', t => {
 	t.not(deserialized, error);
 });
 
+test('should preserve AggregateError errors when wrapping as cause', t => {
+	const deserialized = deserializeError({
+		name: 'AggregateError',
+		message: 'multiple failures',
+		stack: 'serialized stack',
+		errors: [
+			{name: 'Error', message: 'inner one', stack: 'inner one stack'},
+			{name: 'TypeError', message: 'inner two', stack: 'inner two stack'},
+		],
+	}, {asCause: true});
+
+	t.true(deserialized instanceof AggregateError);
+	t.is(deserialized.errors.length, 2);
+	t.is(deserialized.errors[0].message, 'inner one');
+	t.true(deserialized.errors[1] instanceof TypeError);
+	t.is(deserialized.errors[1].message, 'inner two');
+	t.true(deserialized.cause instanceof AggregateError);
+	t.is(deserialized.cause.errors.length, 2);
+	t.false(Object.keys(deserialized).includes('errors'));
+});
+
 test('should preserve buffers when deserializing', t => {
 	const buffer = Buffer.from([1, 2, 3]);
 	const deserialized = deserializeError({

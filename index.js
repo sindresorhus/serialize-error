@@ -56,7 +56,7 @@ const newError = name => {
 const wrapAsCause = (error, stackStartFunction) => {
 	const wrappedError = newError(error.name);
 
-	for (const property of ['name', 'message', 'cause']) {
+	for (const property of ['name', 'message', 'cause', 'errors']) {
 		const value = property === 'cause' ? error : error[property];
 		if (value === undefined || value === null) {
 			continue;
