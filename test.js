@@ -727,6 +727,24 @@ test('should serialize custom error with `.toJSON`', t => {
 	t.true(serialized.stack === undefined);
 });
 
+test('should retry `.toJSON` after it throws', t => {
+	const error = new Error('original');
+	const failure = new Error('temporary failure');
+	let calls = 0;
+	error.toJSON = () => {
+		calls++;
+		if (calls === 1) {
+			throw failure;
+		}
+
+		return {message: 'custom JSON'};
+	};
+
+	t.throws(() => serializeError(error), {is: failure});
+	t.deepEqual(serializeError(error), {message: 'custom JSON'});
+	t.is(calls, 2);
+});
+
 test('should serialize custom error with a property having `.toJSON`', t => {
 	class CustomError extends Error {
 		constructor(value) {

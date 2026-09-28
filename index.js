@@ -32,9 +32,12 @@ const toJsonWasCalled = new WeakSet();
 
 const toJSON = from => {
 	toJsonWasCalled.add(from);
-	const json = from.toJSON();
-	toJsonWasCalled.delete(from);
-	return json;
+
+	try {
+		return from.toJSON();
+	} finally {
+		toJsonWasCalled.delete(from);
+	}
 };
 
 const newError = name => {
