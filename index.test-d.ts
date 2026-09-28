@@ -19,7 +19,7 @@ expectTypeOf(serializeError(null)).toEqualTypeOf<ErrorObject>();
 expectTypeOf(serializeError(() => {})).toEqualTypeOf<ErrorObject>();
 expectTypeOf(serializeError(error as unknown)).toEqualTypeOf<ErrorObject>();
 expectTypeOf(serializeError(error)).toEqualTypeOf<ErrorObject>();
-expectTypeOf({maxDepth: 1}).toMatchTypeOf<Options>();
+expectTypeOf({maxDepth: 1}).toExtend<Options>();
 
 expectTypeOf(deserializeError({
 	message: 'error message',
