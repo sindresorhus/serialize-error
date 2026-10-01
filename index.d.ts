@@ -34,10 +34,10 @@ export type Options = {
 	error.one = {two: {three: {}}};
 
 	console.log(serializeError(error, {maxDepth: 1}));
-	//=> {name: 'Error', message: '🦄', one: {}}
+	//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …', one: {}}
 
 	console.log(serializeError(error, {maxDepth: 2}));
-	//=> {name: 'Error', message: '🦄', one: { two: {}}}
+	//=> {name: 'Error', message: '🦄', stack: 'Error: 🦄\n    at Object.<anonymous> …', one: { two: {} }}
 	```
 	*/
 	readonly maxDepth?: number;
@@ -54,12 +54,13 @@ export type Options = {
 Serialize an `Error` object into a plain object.
 
 - Custom properties are preserved.
-- Non-enumerable properties are kept non-enumerable (name, message, stack).
-- Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
+- All properties are made enumerable (`name`, `message`, `stack`, `cause`, `errors`), so the result survives `JSON.stringify()`.
 - Primitive values (including `null`, `undefined`, strings, numbers, etc.) and functions are wrapped in a `NonError` error and serialized.
 - Buffer properties are replaced with `[object Buffer]`.
+- Stream properties are replaced with `[object Stream]`.
 - Circular references are handled.
 - If the input object has a `.toJSON()` method, then it's called instead of serializing the object's properties.
+- A `.toJSON()` that returns the object it received is ignored, since that would hand back the original rather than a copy.
 - It's up to `.toJSON()` implementation to handle circular references and enumerability of the properties.
 
 @example
@@ -82,14 +83,14 @@ import {serializeError} from 'serialize-error';
 class ErrorWithDate extends Error {
 	constructor() {
 		super();
-		this.date = new Date();
+		this.date = new Date(0);
 	}
 }
 
 const error = new ErrorWithDate();
 
 console.log(serializeError(error));
-//=> {date: '1970-01-01T00:00:00.000Z', name, message, stack}
+//=> {name, message, stack, date: '1970-01-01T00:00:00.000Z'}
 ```
 
 @example
@@ -105,7 +106,7 @@ error.horn = {
 };
 
 serializeError(error);
-// => {horn: 'x', name, message, stack}
+// => {name, message, stack, horn: 'x'}
 ```
 */
 export function serializeError(error: unknown, options?: Options): ErrorObject;
@@ -114,10 +115,10 @@ export function serializeError(error: unknown, options?: Options): ErrorObject;
 Deserialize a plain object or any value into an `Error` object.
 
 - `Error` objects are passed through.
-- Objects that have at least a `message` property are interpreted as errors.
+- Objects with a string `message` property are interpreted as errors. Arrays never are, even with a `message` property.
 - All other values are wrapped in a `NonError` error.
 - Custom properties are preserved.
-- Non-enumerable properties are kept non-enumerable (name, message, stack, cause).
+- Non-enumerable properties are kept non-enumerable (`name`, `message`, `stack`, `cause`, `errors`).
 - Enumerable properties are kept enumerable (all properties besides the non-enumerable ones).
 - Circular references are handled.
 - Native error constructors are preserved (TypeError, DOMException, etc) and more can be added.
@@ -139,7 +140,7 @@ console.log(error);
 export function deserializeError(errorObject: ErrorObject | unknown, options?: Options): Error;
 
 /**
-Predicate to determine whether a value looks like an error, even if it's not an instance of `Error`. It must have at least the `name`, `message`, and `stack` properties.
+Predicate to determine whether a value looks like an error, even if it's not an instance of `Error`. It must be an object with string `name`, `message`, and `stack` properties.
 
 @example
 ```

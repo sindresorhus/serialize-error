@@ -1,5 +1,5 @@
 import NonError from 'non-error';
-import {errorConstructors, errorFactories} from './error-constructors.js';
+import {errorConstructors, errorFactories, isErrorInstance} from './error-constructors.js';
 
 const errorProperties = [
 	{
@@ -40,6 +40,16 @@ const toJSON = from => {
 	}
 };
 
+// Some errors expose getter-only properties that cannot be assigned to, like `DOMException.prototype.code`
+const setProperty = (to, key, value) => {
+	try {
+		to[key] = value;
+	} catch {}
+};
+
+// Derived from the descriptors so the two property loops always agree on which names they own.
+const errorPropertyNames = new Set(errorProperties.map(({property}) => property));
+
 const newError = name => {
 	if (name === 'NonError') {
 		return new NonError();
@@ -56,25 +66,97 @@ const newError = name => {
 		: new ErrorConstructor();
 };
 
-const destroyCircular = ({
-	from,
-	seen,
-	to,
-	forceEnumerable,
-	maxDepth,
-	depth,
-	useToJSON,
-	serialize,
-}) => {
-	if (!to) {
-		if (Array.isArray(from)) {
-			to = [];
-		} else if (!serialize && isErrorLike(from)) {
-			to = newError(from.name);
-		} else {
-			to = {};
-		}
+// Returned for values that must not be copied, such as functions when serializing
+const skip = Symbol('skip');
+
+// Converts a single property value into its serialized form.
+// Shared by the regular properties and the error properties so both get the same conversions.
+// Reads `options` lazily rather than destructuring it, because this runs for every property of every object.
+const destroyValue = (value, options, depth) => {
+	if (value && value instanceof Uint8Array && value.constructor?.name === 'Buffer') {
+		return options.serialize ? '[object Buffer]' : value;
 	}
+
+	// Every stream is also an `EventEmitter`, so requiring `on` keeps plain objects that merely define `pipe` from being mistaken for one
+	if (value !== null && typeof value === 'object' && typeof value.pipe === 'function' && typeof value.on === 'function') {
+		return options.serialize ? '[object Stream]' : value;
+	}
+
+	if (typeof value === 'function') {
+		return options.serialize ? skip : value;
+	}
+
+	if (options.serialize && typeof value === 'bigint') {
+		return `${value}n`;
+	}
+
+	if (!value || typeof value !== 'object') {
+		return value;
+	}
+
+	if (options.seen.has(value)) {
+		return '[Circular]';
+	}
+
+	// Recursing through `destroyCircular` directly, rather than through a per-call wrapper, keeps the stack depth per level unchanged
+	return destroyCircular({
+		...options,
+		from: value,
+		to: undefined,
+		depth,
+	});
+};
+
+const createTarget = (from, serialize) => {
+	if (Array.isArray(from)) {
+		return [];
+	}
+
+	if (!serialize && isErrorLike(from)) {
+		return newError(from.name);
+	}
+
+	return {};
+};
+
+// Some errors have non-configurable properties that cannot be redefined.
+// `addKnownErrorConstructor()` rejects a non-extensible instance, so a property `to` does not have yet can be added. That is only checked on the first call, and a constructor that freezes its instance later is unsupported.
+const canRedefine = (to, property) => Object.getOwnPropertyDescriptor(to, property)?.configurable !== false;
+
+// Returned when a speculative read throws, so the property is skipped rather than written as `undefined`
+const unreadable = Symbol('unreadable');
+
+// The error property names are probed on every value walked, including plain objects that are not errors, and through
+// the prototype chain, since `name` lives on `Error.prototype`. `JSON.stringify()` reads neither a non-enumerable nor
+// an inherited property, so a getter on one of these would otherwise take the whole call down over a property it would
+// never have read either. The regular property loop below is left alone, since it only reads keys `JSON.stringify()`
+// reads too, and a throwing getter there propagates the same way it does natively.
+const readProperty = (from, property) => {
+	try {
+		return from[property];
+	} catch {
+		return unreadable;
+	}
+};
+
+// An error property the source did not set, which must not be invented. An own `null` or `undefined` is kept, because the source set it deliberately and `null` survives `JSON.stringify`.
+// It does not have to be enumerable. `new Error('m', {cause: null})` and `deserializeError()` both set a non-enumerable one, and requiring enumerability lost it on a round trip.
+// Takes the already-read value, so the property is only read once.
+const isAbsent = (from, property, value) =>
+	(value === undefined || value === null) && !Object.hasOwn(from, property);
+
+const destroyCircular = options => {
+	const {
+		from,
+		seen,
+		forceEnumerable,
+		maxDepth,
+		depth,
+		useToJSON,
+		serialize,
+	} = options;
+
+	const to = options.to ?? createTarget(from, serialize);
 
 	seen.add(from);
 
@@ -84,88 +166,61 @@ const destroyCircular = ({
 	}
 
 	if (useToJSON && typeof from.toJSON === 'function' && !toJsonWasCalled.has(from)) {
-		seen.delete(from);
-		return toJSON(from);
+		const json = toJSON(from);
+
+		// A `toJSON()` returning its own receiver is a no-op, so keep serializing instead of handing back the original object
+		if (json !== from) {
+			seen.delete(from);
+			return json;
+		}
 	}
 
-	const continueDestroyCircular = value => destroyCircular({
-		from: value,
-		seen,
-		forceEnumerable,
-		maxDepth,
-		depth: depth + 1,
-		useToJSON,
-		serialize,
-	});
+	// Only a serialized result or a real error gets the error properties below. A nested plain object keeps these
+	// names through the loop that follows instead, which is why that loop only steps aside in this case.
+	// A registered constructor can come from another realm, so this cannot be a plain `instanceof`.
+	const copyErrorProperties = serialize || isErrorInstance(to);
 
-	for (const key of Object.keys(from)) {
-		const value = from[key];
-
-		if (value && value instanceof Uint8Array && value.constructor.name === 'Buffer') {
-			to[key] = serialize ? '[object Buffer]' : value;
-			continue;
-		}
-
-		if (value !== null && typeof value === 'object' && typeof value.pipe === 'function') {
-			to[key] = serialize ? '[object Stream]' : value;
-			continue;
-		}
-
-		if (typeof value === 'function') {
-			if (!serialize) {
-				to[key] = value;
-			}
-
-			continue;
-		}
-
-		if (serialize && typeof value === 'bigint') {
-			to[key] = `${value}n`;
-			continue;
-		}
-
-		if (!value || typeof value !== 'object') {
-			// Gracefully handle non-configurable errors like `DOMException`.
-			try {
-				to[key] = value;
-			} catch {}
-
-			continue;
-		}
-
-		if (!seen.has(value)) {
-			to[key] = continueDestroyCircular(value);
-			continue;
-		}
-
-		to[key] = '[Circular]';
-	}
-
-	if (serialize || to instanceof Error) {
+	// Copies error properties first; JavaScript still enumerates array-index keys before them. This also applies to nested plain objects when serializing.
+	if (copyErrorProperties) {
 		for (const {property, enumerable} of errorProperties) {
-			const value = from[property];
-			if (value === undefined || value === null) {
+			const rawValue = readProperty(from, property);
+			if (rawValue === unreadable || isAbsent(from, property, rawValue)) {
 				continue;
 			}
 
-			const descriptor = Object.getOwnPropertyDescriptor(to, property);
-			if (descriptor?.configurable === false) {
+			const value = destroyValue(rawValue, options, depth + 1);
+			if (value === skip) {
 				continue;
 			}
 
-			let processedValue = value;
-			if (typeof value === 'object') {
-				processedValue = seen.has(value)
-					? '[Circular]'
-					: continueDestroyCircular(value);
+			if (!canRedefine(to, property)) {
+				setProperty(to, property, value);
+				continue;
 			}
 
 			Object.defineProperty(to, property, {
-				value: processedValue,
+				value,
 				enumerable: forceEnumerable || enumerable,
 				configurable: true,
 				writable: true,
 			});
+		}
+	}
+
+	for (const key of Object.keys(from)) {
+		// `JSON.parse` makes `__proto__` an own enumerable property, and assigning it would replace the prototype instead of adding a property
+		if (key === '__proto__') {
+			continue;
+		}
+
+		// Copying these here as well would destroy them twice, running getters and `toJSON()` twice
+		if (copyErrorProperties && errorPropertyNames.has(key)) {
+			continue;
+		}
+
+		const value = destroyValue(from[key], options, depth + 1);
+		if (value !== skip) {
+			setProperty(to, key, value);
 		}
 	}
 
@@ -179,25 +234,13 @@ export function serializeError(value, options = {}) {
 		useToJSON = true,
 	} = options;
 
-	if (typeof value === 'object' && value !== null) {
-		return destroyCircular({
-			from: value,
-			seen: new Set(),
-			forceEnumerable: true,
-			maxDepth,
-			depth: 0,
-			useToJSON,
-			serialize: true,
-		});
-	}
-
 	// People sometimes throw things besides Error objects…
-	if (typeof value === 'function') {
-		value = '<Function>';
+	if (typeof value !== 'object' || value === null) {
+		value = new NonError(typeof value === 'function' ? '<Function>' : value);
 	}
 
 	return destroyCircular({
-		from: new NonError(value),
+		from: value,
 		seen: new Set(),
 		forceEnumerable: true,
 		maxDepth,
@@ -229,11 +272,13 @@ export function deserializeError(value, options = {}) {
 }
 
 export function isErrorLike(value) {
+	// A predicate answers yes or no, and this runs on every nested value while deserializing, so a getter on one of
+	// the three names must not escape as an exception.
 	return Boolean(value)
 		&& typeof value === 'object'
-		&& typeof value.name === 'string'
-		&& typeof value.message === 'string'
-		&& typeof value.stack === 'string';
+		&& typeof readProperty(value, 'name') === 'string'
+		&& typeof readProperty(value, 'message') === 'string'
+		&& typeof readProperty(value, 'stack') === 'string';
 }
 
 // Used as a weak check for immediately-passed objects, whereas `isErrorLike` is used for nested values to avoid bad detection

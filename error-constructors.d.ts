@@ -3,22 +3,16 @@ export type ErrorFactory<T extends Error> = () => T;
 /**
 Let `serialize-error` know about your custom error constructors so that when `{name: 'MyCustomError', message: 'It broke'}` is found, it uses the right error constructor. If "MyCustomError" isn't found in the global list of known constructors, it defaults to the base `Error` error constructor.
 
+The constructor, or the factory if given, must return an extensible `Error` instance, since the payload's properties are added to it.
+
 @param constructor - The error constructor to add.
 @param factory - Factory function to create instances. Optional if the constructor can be called without arguments, required if it needs arguments.
 
 @example
 ```
 // Constructor that works without arguments - factory is optional
-addKnownErrorConstructor(Error);
-addKnownErrorConstructor(TypeError);
-
 class MyError extends Error {
 	name = 'MyError';
-
-	constructor(message?: string) {
-		super(message);
-		this.name = 'MyError';
-	}
 }
 addKnownErrorConstructor(MyError);
 
